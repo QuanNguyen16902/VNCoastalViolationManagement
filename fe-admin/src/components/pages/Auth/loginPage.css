@@ -1,0 +1,71 @@
+.login-container {
+    height: 100vh;
+    background-color: #d3d3d3; /* Màu xám nhạt */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .login-content {
+    display: flex;
+    width: 800px;
+    background-color: #ffffff; /* Màu trắng */
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  
+  .login-image-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #001f3f; /* Màu xanh dương đậm */
+  }
+  
+  .login-logo {
+    max-width: 100%;
+    max-height: 100%;
+  }
+  
+  .login-form-container {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .header-text {
+    text-align: center;
+    color: #001f3f; /* Màu xanh dương đậm */
+  }
+  
+  #login-user-form .MuiTextField-root {
+    margin-bottom: 10px;
+  }
+  
+ 
+  .fade-in {
+    opacity: 1;
+    transition: opacity 0.3s ease-in;
+  }
+  
+  .fade-out {
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+  }
+
+
+  
+  .forgot-password-link {
+    display: inline-block;
+    line-height: 1.5; /* Aligns the link vertically with the checkbox */
+    font-size: 14px; /* Adjust size to match label */
+    color: #007bff; /* Default link color */
+    text-decoration: none; /* Remove underline */
+  }
+  
+  .forgot-password-link:hover {
+    text-decoration: underline; /* Add underline on hover */
+  }
+  

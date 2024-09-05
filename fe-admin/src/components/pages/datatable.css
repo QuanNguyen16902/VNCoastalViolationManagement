@@ -1,0 +1,134 @@
+.datatable {
+    height: 600px;
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 15px;
+  }
+  
+  .datatable .datatableTitle {
+    width: 100%;
+    font-size: 20px;
+    color: gray;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .datatable .datatableTitle .link {
+    text-decoration: none;
+    color: green;
+    font-size: 16px;
+    font-weight: 400;
+    border: 1px solid green;
+    padding: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .datatable .datatableTitle .link:hover{
+    background-color: green; 
+    color: white;
+    transition: ease-in-out 0.3s;
+  }
+
+  .datatable .datatableTitle .deleteSelectedButton {
+    text-decoration: none;
+    color: crimson;
+    font-size: 16px;
+    font-weight: 400;
+    border: 1px solid crimson;
+    padding: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .datatable .datatableTitle .deleteSelectedButton:hover{
+    background-color: crimson; 
+    color: white;
+    transition: ease-in-out 0.3s;
+  }
+  .datatable .cellWithImg {
+    display: flex;
+    align-items: center;
+  }
+  
+  .datatable .cellWithImg .cellImg {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 20px;
+  }
+  
+  .datatable .cellWithStatus {
+    padding: 5px;
+    border-radius: 5px;
+  }
+  
+  .datatable .cellWithStatus.active {
+    background-color: rgba(0, 128, 0, 0.05);
+    color: green;
+    display: inline;
+  }
+ 
+  .datatable .cellWithStatus.inactive {
+    background-color: rgba(255, 0, 0, 0.05);
+    color: crimson;
+    display: inline;
+  }
+  
+  .datatable .cellAction {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .datatable .cellAction .viewButton {
+    padding: 2px 5px;
+    border-radius: 5px;
+    color: rgb(101, 101, 235);
+    cursor: pointer;
+    display: inline;
+  }
+  
+  .datatable .cellAction .deleteButton {
+    padding: 2px 5px;
+    border-radius: 5px;
+    color: rgb(228, 92, 119);
+    cursor: pointer;
+    display: inline;
+  }
+  .datatable .cellAction .viewButton:hover {
+    color: darkblue;
+  }
+  .datatable .cellAction .deleteButton:hover {
+    color: crimson;
+  }
+  
+  .datagrid .MuiDataGrid-columnHeaderTitle {
+    font-weight: bold;
+    font-size: 16px;
+  }
+
+  .datagrid .MuiDataGrid-row:nth-child(even) {
+    background-color: #f9f9f9b0; /* Màu nền cho các dòng chẵn */
+  }
+  
+  .datagrid .MuiDataGrid-row:nth-child(odd) {
+    background-color: #ffffff; /* Màu nền cho các dòng lẻ */
+  }
+
+  .MuiDataGrid-cell:focus,
+  .MuiDataGrid-cell:focus-within {
+    outline: none !important;
+    border: none !important;
+  }
+
+  .datatable .rolesName {
+    padding: 5px;
+    margin-right: 5px;
+    border-radius: 5px;
+      background-color: rgba(65, 111, 240, 0.05);
+      color: darkblue;
+      display: inline;
+  }

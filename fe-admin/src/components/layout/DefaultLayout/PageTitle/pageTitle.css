@@ -1,0 +1,20 @@
+
+.pagetitle {
+    margin-top: 40px;
+    padding: 20px 0px 0px 20px;
+    transition: all 0.3s;
+}
+
+.pagetitle h1 {
+    font-size: 24px;
+    margin-bottom: 0;
+    font-weight: 600;
+    color: #012970;
+}
+
+ 
+ @media (max-width: 1199px) {
+    .pagetitle {
+        padding: 10px;
+    }
+ }
