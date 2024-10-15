@@ -4,11 +4,12 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle
+  DialogTitle,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { useUserRoles } from "../../../hooks/useUserRoles";
 import UserService from "../../../service/user.service";
 import "../datatable.css";
 import SearchField from "../SearchField";
@@ -16,6 +17,9 @@ import AddUserModal from "./AddUserModal";
 import EditUserModal from "./EditUserModal";
 
 function Users() {
+  const roles = useUserRoles();
+  const canView = roles.includes("ROLE_ADMIN");
+
   const [data, setData] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
   const [openDelete, setOpenDelete] = useState(false);
@@ -24,9 +28,11 @@ function Users() {
   const [openEdit, setOpenEdit] = useState(false);
   const [editUserId, setEditUserId] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
+  const [loading, setLoading] = useState(true); // Thêm trạng thái loading
 
   // Fetch users with optional search keyword
-  const fetchUsers = async (keyword = '') => {
+  const fetchUsers = async (keyword = "") => {
+    setLoading(true); // Bắt đầu trạng thái loading
     try {
       let response;
       if (keyword) {
@@ -35,22 +41,24 @@ function Users() {
       } else {
         response = await UserService.getUsers();
         setData(response.data);
-        setSearchResults([]); // Clear search results when fetching all users
+        setSearchResults([]);
       }
     } catch (error) {
-      console.error("Failed to fetch users", error);
+      console.error("Lỗi truy xuất người dùng", error);
+    } finally {
+      setLoading(false); // Kết thúc trạng thái loading
     }
   };
 
   useEffect(() => {
-    fetchUsers(); // Fetch all users on initial load
+    fetchUsers();
   }, []);
 
   // Handle delete dialog
   const handleDelete = async () => {
     try {
       await UserService.deleteUser(deleteId);
-      fetchUsers(); // Fetch users again to update the list
+      fetchUsers(); // Cập nhật lại danh sách sau khi xóa
       toast.success("Xóa thành công!");
     } catch (error) {
       toast.error("Xóa không thành công!");
@@ -77,17 +85,19 @@ function Users() {
 
   // Handle search
   const handleSearch = (keyword) => {
-    fetchUsers(keyword); 
+    fetchUsers(keyword);
   };
 
   // Prepare data for DataGrid
-  const rows = (searchResults.length > 0 ? searchResults : data).map((item) => ({
-    id: item.id,
-    username: item.username,
-    email: item.email,
-    enabled: item.enabled,
-    roles: item.roles || [],
-  }));
+  const rows = (searchResults.length > 0 ? searchResults : data).map(
+    (item) => ({
+      id: item.id,
+      username: item.username,
+      email: item.email,
+      enabled: item.enabled,
+      roles: item.roles || [],
+    })
+  );
 
   const columns = [
     { field: "id", headerName: "ID", width: 40 },
@@ -111,12 +121,14 @@ function Users() {
     { field: "email", headerName: "Email", width: 230 },
     {
       field: "roles",
-      headerName: "Quyền",
-      width: 300,
+      headerName: "Quyền cá nhân",
+      width: 200,
       renderCell: (params) => (
         <div>
           {params.value.map((role) => (
-            <div key={role.id} className="rolesName">{role.name}</div>
+            <div key={role.id} className="rolesName">
+              {role.name}
+            </div>
           ))}
         </div>
       ),
@@ -124,9 +136,13 @@ function Users() {
     {
       field: "enabled",
       headerName: "Tình trạng",
-      width: 160,
+      width: 140,
       renderCell: (params) => (
-        <div className={`cellWithStatus ${params.row.enabled === true ? 'active' : 'inactive'}`}>
+        <div
+          className={`cellWithStatus ${
+            params.row.enabled === true ? "active" : "inactive"
+          }`}
+        >
           {params.row.enabled === true ? "Kích hoạt" : "Chưa kích hoạt"}
         </div>
       ),
@@ -162,6 +178,43 @@ function Users() {
       ),
     },
   ];
+
+  if (loading) {
+    return (
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!canView) {
+    return (
+      <div className="d-flex justify-content-center align-items-center">
+        <div
+          className="text-center p-4"
+          style={{
+            borderRadius: "10px",
+            backgroundColor: "#e7f3fe",
+            border: "2px solid #007bff",
+            maxWidth: "500px",
+          }}
+        >
+          <i
+            className="bi bi-exclamation-octagon fw-bold text-primary"
+            style={{ fontSize: "48px" }}
+          ></i>
+          <h4 className="mt-3">Bạn không có quyền xem danh sách người dùng</h4>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="datatable">

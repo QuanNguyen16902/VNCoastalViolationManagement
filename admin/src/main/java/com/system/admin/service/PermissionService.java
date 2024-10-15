@@ -1,7 +1,6 @@
 package com.system.admin.service;
 
 import com.system.admin.exception.PermissionNotFoundException;
-import com.system.admin.exception.RoleNotFoundException;
 import com.system.admin.model.Permission;
 import com.system.admin.repository.PermissionRepository;
 import jakarta.transaction.Transactional;
@@ -13,8 +12,12 @@ import java.util.Optional;
 
 @Service
 public class PermissionService {
-    @Autowired
     private PermissionRepository permissionRepository;
+
+    @Autowired
+    public PermissionService(PermissionRepository permissionRepository) {
+        this.permissionRepository = permissionRepository;
+    }
 
     public List<Permission> getAll(){
         return permissionRepository.findAll();

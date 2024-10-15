@@ -18,14 +18,7 @@ class RoleService {
     return axios.delete(API_URL + `roles/${id}`, { headers: authHeader() });
   }
   addRole(roleData) {
-    return axios
-      .post(API_URL + "roles", roleData, { headers: authHeader() })
-      .then((response) => {
-        return response.data;
-      })
-      .catch((error) => {
-        console.log("Có lỗi khi thêm quyền", error);
-      });
+    return axios.post(API_URL + "roles", roleData, { headers: authHeader() });
   }
   editRole(id, roleData) {
     return axios

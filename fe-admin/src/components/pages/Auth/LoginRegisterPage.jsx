@@ -1,31 +1,17 @@
-import { Button, Checkbox, FormControlLabel, TextField } from "@mui/material";
-import { Field, Form, Formik } from "formik";
+import { Button } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import * as Yup from "yup";
 import logo from "../../../images/logo1.png";
 import AuthService from "../../../service/auth.service"; // Import AuthService
+import AuthForm from "./AuthForm";
 import "./loading.css";
 import "./loginPage.css";
-
-// Validation schema for login and registration forms
-const loginValidationSchema = Yup.object({
-  username: Yup.string().required("Chưa điền username"),
-  password: Yup.string().required("Chưa điền mật khẩu"),
-});
-
-const registerValidationSchema = Yup.object({
-  username: Yup.string().required("Chưa điền username"),
-  email: Yup.string().email("Email không đúng định dạng").required("Chưa điền email"),
-  password: Yup.string().required("Chưa điền mật khẩu"),
-});
 
 function LoginPage() {
   const [isRegister, setIsRegister] = useState(false);
   const [fadeEffect, setFadeEffect] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [redirect, setRedirect] = useState(null);
   const location = useLocation();
   const navigate = useNavigate(); // Để điều hướng sau khi login
 
@@ -36,7 +22,7 @@ function LoginPage() {
       setIsRegister(false);
     }
   }, [location]);
-   
+
   const handleToggleForm = () => {
     setFadeEffect(true);
     setTimeout(() => {
@@ -48,35 +34,38 @@ function LoginPage() {
   const handleSubmit = async (values) => {
     setIsLoading(true);
     try {
-        if (isRegister) {
-            await AuthService.register(values.username, values.email, values.password);
-            setIsLoading(false);
-            toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
-            handleToggleForm(); // Switch to login form after registration
-        } else {
-            const result = await AuthService.login(values.username, values.password);
-            
-            if (result.success) {
-                setTimeout(() => {
-                    setIsLoading(false); // Turn off loading
-                    toast.success("Đăng nhập thành công");
-                    navigate("/"); // Redirect to the home page
-                }, 1500);
-            } else {
-                toast.error(result.message); // Display the error message from the result
-                setIsLoading(false);
-            }
-        }
-    } catch (error) {
-        const errorMessage = error.response?.data?.message || "Có lỗi xảy ra!";
-        toast.error(errorMessage);
-        setIsLoading(false); // Ensure loading is turned off in case of an exception
-    }
-};
+      if (isRegister) {
+        await AuthService.register(
+          values.usernameRegister,
+          values.emailRegister,
+          values.passwordRegister
+        );
+        setIsLoading(false);
+        toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
+        handleToggleForm();
+      } else {
+        const result = await AuthService.login(
+          values.usernameLogin,
+          values.passwordLogin
+        );
 
-  
-  
-  
+        if (result.success) {
+          setTimeout(() => {
+            setIsLoading(false); // Turn off loading
+            toast.success("Đăng nhập thành công");
+            navigate("/");
+          }, 1500);
+        } else {
+          toast.error(result.message);
+          setIsLoading(false);
+        }
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Có lỗi xảy ra!";
+      toast.error(errorMessage);
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="login-container d-flex align-items-center justify-content-center">
@@ -87,79 +76,34 @@ function LoginPage() {
 
         <div className="login-form-container p-4">
           <div className="d-flex justify-content-between">
-            <Button onClick={() => isRegister && handleToggleForm()} disabled={fadeEffect}>
+            <Button
+              onClick={() => isRegister && handleToggleForm()}
+              disabled={fadeEffect}
+            >
               Đăng nhập
             </Button>
-            <Button onClick={() => !isRegister && handleToggleForm()} disabled={fadeEffect}>
+            <Button
+              onClick={() => !isRegister && handleToggleForm()}
+              disabled={fadeEffect}
+            >
               Đăng ký
             </Button>
           </div>
 
-          <div className={`header-text mb-4 ${fadeEffect ? "fade-out" : "fade-in"}`}>
-            <h1>{isRegister ? "Đăng ký" : "Đăng nhập"}</h1>
+          <div
+            className={`header-text mb-4 ${
+              fadeEffect ? "fade-out" : "fade-in"
+            }`}
+          >
+            <h4>{isRegister ? "Đăng ký" : "Đăng nhập"}</h4>
           </div>
 
-          <Formik
-            initialValues={
-              isRegister
-                ? { username: "", email: "", password: "" }
-                : { username: "", password: "", rememberMe: false }
-            }
-            validationSchema={isRegister ? registerValidationSchema : loginValidationSchema}
-            onSubmit={handleSubmit}
-          >
-            <Form id="login-user-form" className={`form-content ${fadeEffect ? "fade-out" : "fade-in"}`}>
-              <Field
-                as={TextField}
-                name="username"
-                label="Username"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                required
-              />
-               {isRegister && (
-                <Field
-                  as={TextField}
-                  name="email"
-                  label="Email"
-                  fullWidth
-                  margin="normal"
-                  variant="outlined"
-                  required
-                  type="email"
-                />
-              )}
-              <Field
-                as={TextField}
-                name="password"
-                label="Mật khẩu"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                required
-                type="password"
-              />
-              {!isRegister && (
-                <div className="remember-forgot-container d-flex justify-content-between align-items-center">
-                  <Field
-                    as={FormControlLabel}
-                    control={<Checkbox />}
-                    name="rememberMe"
-                    label="Nhớ mật khẩu"
-                    className="d-flex align-items-center"
-                  />
-                  <Link to="/forgot-password" className="forgot-password-link">
-                    Quên mật khẩu?
-                  </Link>
-                </div>
-              )}
-
-              <Button className="bg-primary text-white border border-primary w-100 mt-3" type="submit" form="login-user-form" autoFocus>
-                {isRegister ? "Đăng ký" : "Đăng nhập"}
-              </Button>
-            </Form>
-          </Formik>
+          <AuthForm
+            isRegister={isRegister}
+            fadeEffect={fadeEffect}
+            handleSubmit={handleSubmit}
+            setFadeEffect={setFadeEffect}
+          />
 
           <p className="text-center mt-3">
             {isRegister ? "Đã có tài khoản?" : "Bạn chưa có tài khoản?"}{" "}
@@ -167,10 +111,13 @@ function LoginPage() {
               {isRegister ? "Đăng nhập" : "Đăng ký"}
             </a>
           </p>
-          {!isRegister && (
-            <div className="text-center mt-3">
+          {/* {!isRegister && (
+            <div className="text-center mt-0">
               <p>Đăng nhập bằng: </p>
-              <div className="d-flex justify-content-between mx-auto" style={{ width: "40%" }}>
+              <div
+                className="d-flex justify-content-between mx-auto"
+                style={{ width: "40%" }}
+              >
                 <Button style={{ color: "#1266f1" }}>
                   <i className="bi bi-facebook" size="sm" />
                 </Button>
@@ -180,15 +127,22 @@ function LoginPage() {
                 </Button>
               </div>
             </div>
-          )}
+          )} */}
           {isLoading && (
-        <div className='loading-overlay'>
-          <div className='spinner'></div>
-          <p>Đang xử lý...</p>
-        </div>
-      )}
-          <div className="text-center">
-            <p>Admin Panel - Copyright &copy; QuanNguyen</p>
+            <div className="loading-overlay">
+              <div className="spinner"></div>
+              <p>Đang xử lý...</p>
+            </div>
+          )}
+          <div className="support-info">
+            <h5 className="fw-bold">Thông tin hỗ trợ:</h5>
+            <p className="fw-medium">
+              Điện thoại: 0961240858 (Admin) <br /> Email:
+              quannguyen16902hn@gmail.com
+            </p>
+            <p className="fw-medium">
+              Admin Panel - Copyright &copy; QuanNguyen
+            </p>
           </div>
         </div>
       </div>

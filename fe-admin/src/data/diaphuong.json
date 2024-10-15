@@ -1,0 +1,317 @@
+[
+    {
+      "stt": "01",
+      "dia_phuong": "An Giang",
+      "viet_tat": "AG"
+    },
+    {
+      "stt": "02",
+      "dia_phuong": "Bà Rịa - Vũng Tàu",
+      "viet_tat": "BV"
+    },
+    {
+      "stt": "03",
+      "dia_phuong": "Bạc Liêu",
+      "viet_tat": "BL"
+    },
+    {
+      "stt": "04",
+      "dia_phuong": "Bắc Kạn",
+      "viet_tat": "BK"
+    },
+    {
+      "stt": "05",
+      "dia_phuong": "Bắc Giang",
+      "viet_tat": "BG"
+    },
+    {
+      "stt": "06",
+      "dia_phuong": "Bắc Ninh",
+      "viet_tat": "BN"
+    },
+    {
+      "stt": "07",
+      "dia_phuong": "Bến Tre",
+      "viet_tat": "BT"
+    },
+    {
+      "stt": "08",
+      "dia_phuong": "Bình Dương",
+      "viet_tat": "BD"
+    },
+    {
+      "stt": "09",
+      "dia_phuong": "Bình Định",
+      "viet_tat": "BĐ"
+    },
+    {
+      "stt": "10",
+      "dia_phuong": "Bình Phước",
+      "viet_tat": "BP"
+    },
+    {
+      "stt": "11",
+      "dia_phuong": "Bình Thuận",
+      "viet_tat": "BTh"
+    },
+    {
+      "stt": "12",
+      "dia_phuong": "Cà Mau",
+      "viet_tat": "CM"
+    },
+    {
+      "stt": "13",
+      "dia_phuong": "Cần Thơ",
+      "viet_tat": "CT"
+    },
+    {
+      "stt": "14",
+      "dia_phuong": "Cao Bằng",
+      "viet_tat": "CB"
+    },
+    {
+      "stt": "15",
+      "dia_phuong": "Đà Nẵng",
+      "viet_tat": "ĐN"
+    },
+    {
+      "stt": "16",
+      "dia_phuong": "Đắk Lắk",
+      "viet_tat": "ĐL"
+    },
+    {
+      "stt": "17",
+      "dia_phuong": "Đắk Nông",
+      "viet_tat": "ĐNă"
+    },
+    {
+      "stt": "18",
+      "dia_phuong": "Điện Biên",
+      "viet_tat": "ĐB"
+    },
+    {
+      "stt": "19",
+      "dia_phuong": "Đồng Nai",
+      "viet_tat": "ĐNa"
+    },
+    {
+      "stt": "20",
+      "dia_phuong": "Đồng Tháp",
+      "viet_tat": "ĐT"
+    },
+    {
+      "stt": "21",
+      "dia_phuong": "Gia Lai",
+      "viet_tat": "GL"
+    },
+    {
+      "stt": "22",
+      "dia_phuong": "Hà Giang",
+      "viet_tat": "HG"
+    },
+    {
+      "stt": "23",
+      "dia_phuong": "Hà Nam",
+      "viet_tat": "HNa"
+    },
+    {
+      "stt": "24",
+      "dia_phuong": "Hà Nội",
+      "viet_tat": "HN"
+    },
+    {
+      "stt": "25",
+      "dia_phuong": "Hà Tĩnh",
+      "viet_tat": "HT"
+    },
+    {
+      "stt": "26",
+      "dia_phuong": "Hải Dương",
+      "viet_tat": "HD"
+    },
+    {
+      "stt": "27",
+      "dia_phuong": "Hải Phòng",
+      "viet_tat": "HP"
+    },
+    {
+      "stt": "28",
+      "dia_phuong": "Hậu Giang",
+      "viet_tat": "HG"
+    },
+    {
+      "stt": "29",
+      "dia_phuong": "Hòa Bình",
+      "viet_tat": "HB"
+    },
+    {
+      "stt": "30",
+      "dia_phuong": "TP Hồ Chí Minh",
+      "viet_tat": "HCM"
+    },
+    {
+      "stt": "31",
+      "dia_phuong": "Hưng Yên",
+      "viet_tat": "HY"
+    },
+    {
+      "stt": "32",
+      "dia_phuong": "Khánh Hòa",
+      "viet_tat": "KH"
+    },
+    {
+      "stt": "33",
+      "dia_phuong": "Kiên Giang",
+      "viet_tat": "KG"
+    },
+    {
+      "stt": "34",
+      "dia_phuong": "Kon Tum",
+      "viet_tat": "KT"
+    },
+    {
+      "stt": "35",
+      "dia_phuong": "Lai Châu",
+      "viet_tat": "LC"
+    },
+    {
+      "stt": "36",
+      "dia_phuong": "Lạng Sơn",
+      "viet_tat": "LS"
+    },
+    {
+      "stt": "37",
+      "dia_phuong": "Lâm Đồng",
+      "viet_tat": "LĐ"
+    },
+    {
+      "stt": "38",
+      "dia_phuong": "Long An",
+      "viet_tat": "LA"
+    },
+    {
+      "stt": "39",
+      "dia_phuong": "Lào Cai",
+      "viet_tat": "LCa"
+    },
+    {
+      "stt": "40",
+      "dia_phuong": "Nam Định",
+      "viet_tat": "ND"
+    },
+    {
+      "stt": "41",
+      "dia_phuong": "Nghệ An",
+      "viet_tat": "NA"
+    },
+    {
+      "stt": "42",
+      "dia_phuong": "Ninh Bình",
+      "viet_tat": "NB"
+    },
+    {
+      "stt": "43",
+      "dia_phuong": "Ninh Thuận",
+      "viet_tat": "NT"
+    },
+    {
+      "stt": "44",
+      "dia_phuong": "Phú Thọ",
+      "viet_tat": "PT"
+    },
+    {
+      "stt": "45",
+      "dia_phuong": "Phú Yên",
+      "viet_tat": "PY"
+    },
+    {
+      "stt": "46",
+      "dia_phuong": "Quảng Bình",
+      "viet_tat": "QB"
+    },
+    {
+      "stt": "47",
+      "dia_phuong": "Quảng Nam",
+      "viet_tat": "QNa"
+    },
+    {
+      "stt": "48",
+      "dia_phuong": "Quảng Ngãi",
+      "viet_tat": "QNg"
+    },
+    {
+      "stt": "49",
+      "dia_phuong": "Quảng Ninh",
+      "viet_tat": "QN"
+    },
+    {
+      "stt": "50",
+      "dia_phuong": "Quảng Trị",
+      "viet_tat": "QT"
+    },
+    {
+      "stt": "51",
+      "dia_phuong": "Sóc Trăng",
+      "viet_tat": "ST"
+    },
+    {
+      "stt": "52",
+      "dia_phuong": "Sơn La",
+      "viet_tat": "SL"
+    },
+    {
+      "stt": "53",
+      "dia_phuong": "Tây Ninh",
+      "viet_tat": "TN"
+    },
+    {
+      "stt": "54",
+      "dia_phuong": "Thái Bình",
+      "viet_tat": "TB"
+    },
+    {
+      "stt": "55",
+      "dia_phuong": "Thái Nguyên",
+      "viet_tat": "TN"
+    },
+    {
+      "stt": "56",
+      "dia_phuong": "Thanh Hóa",
+      "viet_tat": "TH"
+    },
+    {
+      "stt": "57",
+      "dia_phuong": "Thừa Thiên - Huế",
+      "viet_tat": "TTH"
+    },
+    {
+      "stt": "58",
+      "dia_phuong": "Tiền Giang",
+      "viet_tat": "TG"
+    },
+    {
+      "stt": "59",
+      "dia_phuong": "Trà Vinh",
+      "viet_tat": "TV"
+    },
+    {
+      "stt": "60",
+      "dia_phuong": "Tuyên Quang",
+      "viet_tat": "TQ"
+    },
+    {
+      "stt": "61",
+      "dia_phuong": "Vĩnh Long",
+      "viet_tat": "VL"
+    },
+    {
+      "stt": "62",
+      "dia_phuong":"Vĩnh Phúc",
+      "viet_tat": "VP"
+    },
+    {
+      "stt": "63",
+      "dia_phuong":"Yên Bái",
+      "viet_tat": "YB"
+    }
+]

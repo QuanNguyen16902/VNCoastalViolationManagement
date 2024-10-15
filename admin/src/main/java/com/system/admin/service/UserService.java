@@ -11,8 +11,12 @@ import com.system.admin.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.Null;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
+import org.springframework.data.domain.Sort.Order;
 import java.util.*;
 
 @Service
@@ -20,6 +24,7 @@ import java.util.*;
 public class UserService {
     public RoleRepository roleRepository;
     public UserRepository userRepository;
+
     @Autowired
     public UserService(RoleRepository roleRepository, UserRepository userRepository){
         this.roleRepository = roleRepository;
@@ -36,12 +41,31 @@ public class UserService {
     public List<User> getAll(){
         return userRepository.findAll();
     }
+    // Method to get all users with pagination
+    public Page<User> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable);
+    }
+
+    // Method to search users based on a keyword
+    public Page<User> searchUsers(String keyword, Pageable pageable) {
+        return userRepository.findByEmailContainingIgnoreCase(keyword, pageable);
+    }
 
     public List<User> searchUsers(String keyword) {
         return userRepository.searchUsers(keyword);
     }
     public User register(User user){
         return userRepository.save(user);
+    }
+    @Transactional
+    public void assignRolesToUsers(Set<Long> userIds, Set<Long> roleIds) {
+        Set<Role> roles = new HashSet<>(roleRepository.findAllById(roleIds));
+        List<User> users = userRepository.findAllById(userIds);
+
+        for (User user : users) {
+            user.setRoles(roles);
+            userRepository.save(user);
+        }
     }
     public User save(User user){
         if(userRepository.existsByEmail(user.getEmail())){
@@ -50,14 +74,14 @@ public class UserService {
         if(userRepository.existsByUsername(user.getUsername())){
             throw new UsernameAlreadyExistsException("Đã tồn tại người dùng với username là " + user.getUsername());
         }
-
-        Set<Role> roles = new HashSet<>();
-        for (String roleNames : user.getRolesName()) {
-            Role role = roleRepository.findByName(roleNames)
-                    .orElseThrow(() -> new RoleNotFoundException("Không tìm thấy: " + roleNames));
-            roles.add(role);
-        }
-        user.setRoles(roles);
+//
+//        Set<Role> roles = new HashSet<>();
+//        for (String roleNames : user.getRolesName()) {
+//            Role role = roleRepository.findByName(roleNames)
+//                    .orElseThrow(() -> new RoleNotFoundException("Không tìm thấy: " + roleNames));
+//            roles.add(role);
+//        }
+//        user.setRoles(roles);
        return userRepository.save(user);
     }
     public User updateUser(Long id, User userDetails) {
@@ -71,13 +95,13 @@ public class UserService {
         existingUser.setEnabled(userDetails.isEnabled());
 
 //         Update roles
-        Set<Role> roles = new HashSet<>();
-        for (String roleName : userDetails.getRolesName()) {
-            Role role = roleRepository.findByName(roleName)
-                    .orElseThrow(() -> new RoleNotFoundException("Không thấy quyền: " + roleName));
-            roles.add(role);
-        }
-        existingUser.setRoles(roles);
+//        Set<Role> roles = new HashSet<>();
+//        for (String roleName : userDetails.getRolesName()) {
+//            Role role = roleRepository.findByName(roleName)
+//                    .orElseThrow(() -> new RoleNotFoundException("Không thấy quyền: " + roleName));
+//            roles.add(role);
+//        }
+        existingUser.setRoles(userDetails.getRoles());
 
         // Save and return updated user
         return userRepository.save(existingUser);

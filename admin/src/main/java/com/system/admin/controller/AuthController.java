@@ -1,6 +1,7 @@
 package com.system.admin.controller;
 
 import com.system.admin.exception.TokenRefreshException;
+import com.system.admin.model.SettingUpdateRequest;
 import com.system.admin.model.SystemLog;
 import com.system.admin.model.token.PasswordResetToken;
 import com.system.admin.model.token.RefreshToken;
@@ -19,7 +20,6 @@ import com.system.admin.security.auth_service.UserDetailsImpl;
 import com.system.admin.security.jwt.JwtUtils;
 import com.system.admin.service.SystemLogService;
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -27,25 +27,21 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.io.UnsupportedEncodingException;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/admin/auth")
+@RequestMapping("${API_URL}/auth")
 public class AuthController {
     @Autowired
     AuthenticationManager authenticationManager;
@@ -91,8 +87,14 @@ public class AuthController {
 
             // Tạo JWT token
             String jwt = jwtUtils.generateJwtToken(userDetails);
-            List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
+            List<String> roles = userDetails.getRoles().stream()
+                    .map(GrantedAuthority::getAuthority) // Lấy tên vai trò từ getRoles()
                     .collect(Collectors.toList());
+
+            List<String> permissions = userDetails.getPermissions().stream()
+                    .map(GrantedAuthority::getAuthority) // Lấy tên quyền từ getPermissions()
+                    .collect(Collectors.toList());
+
 
             RefreshToken refreshToken;
             try {
@@ -109,7 +111,7 @@ public class AuthController {
             logService.save(log);
             // Trả về thông tin JWT và refresh token
             return ResponseEntity.ok(new JwtResponse(jwt, refreshToken.getToken(), userDetails.getId(),
-                    userDetails.getUsername(), userDetails.getEmail(), roles));
+                    userDetails.getUsername(), userDetails.getEmail(), roles, permissions));
         } catch (BadCredentialsException e) {
             // Lỗi khi thông tin đăng nhập không chính xác
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Tên đăng nhập hoặc mật khẩu không đúng");
@@ -124,9 +126,6 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Có lỗi không mong muốn xảy ra");
         }
     }
-
-
-
 
 
     @PostMapping("/register")
@@ -151,17 +150,16 @@ public class AuthController {
                 Role foundRole;
                 switch (role) {
                     case "admin":
-                        foundRole = roleRepository.findByName("Admin")
+                        foundRole = roleRepository.findByName("ADMIN")
                                 .orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy vai trò admin."));
                         break;
                     default:
-                        foundRole = roleRepository.findByName("User")
+                        foundRole = roleRepository.findByName("USER")
                                 .orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy vai trò người dùng."));
                 }
                 roles.add(foundRole);
             });
         }
-
         user.setRoles(roles);
         userRepository.save(user);
 
@@ -188,22 +186,25 @@ public class AuthController {
         log.setAction("Người dùng đã đăng xuất");
         log.setDetails("User " + ((UserDetailsImpl) authentication.getPrincipal()).getUsername() + " đã đăng xuất.");
         logService.save(log);
+
         return ResponseEntity.ok().body(new MessageResponse("Đăng xuất thành công!"));
     }
 
     @PostMapping("/refreshtoken")
-    public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request){
+    public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
         String requestRefreshToken = request.getRefreshToken();
 
         return refreshTokenService.findByToken(requestRefreshToken)
                 .map(refreshTokenService::verifyExpiration)
                 .map(RefreshToken::getUser)
                 .map(user -> {
-                    String token = jwtUtils.generateTokenFromUsername(user.getUsername());
+                    // Generate a new JWT token using the user object
+                    String token = jwtUtils.generateTokenFromUsername(UserDetailsImpl.build(user)); // Updated method
                     return ResponseEntity.ok(new TokenRefreshResponse(token, requestRefreshToken));
                 }).orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
                         "Refresh token không có trong CSDL"));
     }
+
 
     @GetMapping("/currentUser")
     public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -219,7 +220,6 @@ public class AuthController {
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequest request) {
         String email = request.getEmail().trim();
-
         // Tìm người dùng dựa trên email
         Optional<User> userOptional = userRepository.findByEmail(email);
 
@@ -235,7 +235,8 @@ public class AuthController {
         passwordResetToken.setToken(token);
         passwordResetToken.setEmail(email);
         passwordResetToken.setVerificationCode(verificationCode);
-        passwordResetToken.setExpiryDate(new Date(System.currentTimeMillis() + 3600 * 1000)); // Token hết hạn sau 1 giờ
+        // Token hết hạn sau 1 giờ
+        passwordResetToken.setExpiryDate(new Date(System.currentTimeMillis() + 3600 * 1000));
 
         // Lưu token vào cơ sở dữ liệu
         tokenRepository.save(passwordResetToken);
@@ -246,6 +247,7 @@ public class AuthController {
         // Gửi email với liên kết reset mật khẩu
         String content = "<p>Xin chào,</p>" +
                 "<p>Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu của bạn.</p>" +
+                "<p>Với tài khoản là: <strong>"+ userOptional.get().getUsername() +"</strong></p>" +
                 "<p>Vui lòng nhấp vào liên kết dưới đây để đặt lại mật khẩu:</p>" +
                 "<p>Mã xác nhận của bạn là: <strong>" + verificationCode + "</strong></p>" +
                 "<p><a href=\"" + resetUrl + "\">Đặt lại mật khẩu</a></p>" +

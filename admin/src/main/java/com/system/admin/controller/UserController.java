@@ -7,26 +7,31 @@ import com.system.admin.exception.UserNotFoundException;
 import com.system.admin.exception.UsernameAlreadyExistsException;
 import com.system.admin.model.SystemLog;
 import com.system.admin.model.User;
+import com.system.admin.payload.request.AssignRoleRequest;
+import com.system.admin.payload.response.PaginatedResponse;
 import com.system.admin.security.auth_service.UserDetailsImpl;
 import com.system.admin.service.SystemLogService;
 import com.system.admin.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.AuthorizationServiceException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 // Các import khác
 
 @RestController
 @CrossOrigin(origins = "*")
-@RequestMapping("/api/admin")
+@RequestMapping("${API_URL}")
+@PreAuthorize("hasRole('ADMIN')")
 public class UserController {
     private UserService userService;
     private SystemLogService logService;  // Thêm dependency
@@ -38,11 +43,37 @@ public class UserController {
         this.logService = logService;
     }
 
+
+//    @GetMapping("/users")
+//    public ResponseEntity<PaginatedResponse<User>> getAllUser(Pageable pageable) {
+//        Page<User> userPage = userService.getAllUsers(pageable);
+//        PaginatedResponse<User> response = new PaginatedResponse<>(
+//                userPage.getNumber() + 1,
+//                pageable.getPageSize(),
+//                userPage.getTotalElements(),
+//                userPage.getContent()
+//        );
+//        return ResponseEntity.ok().body(response);
+//    }
+//
+//
+//    @GetMapping("/users/search")
+//    public ResponseEntity<PaginatedResponse<User>> searchUsers(@RequestParam("keyword") String keyword, Pageable pageable) {
+//        Page<User> userPage = userService.searchUsers(keyword, pageable);
+//        PaginatedResponse<User> response = new PaginatedResponse<>(
+//                userPage.getNumber() + 1,
+//                pageable.getPageSize(),
+//                userPage.getTotalElements(),
+//                userPage.getContent()
+//        );
+//        return ResponseEntity.ok().body(response);
+//    }
     @GetMapping("/users")
     public ResponseEntity<?> getAllUser() {
         List<User> userList = userService.getAll();
         // Ghi nhật ký
 //        logUtils.logAction("GET", "Fetched all users", null);
+
         return ResponseEntity.ok().body(userList);
     }
 
@@ -52,8 +83,10 @@ public class UserController {
         // Ghi nhật ký
         logUtils.logAction("SEARCH", "Tìm kiếm người dùng với keyword: " + keyword, null);
         return users;
+
     }
 
+    @PreAuthorize("hasAuthority('CREATE_USER')")
     @PostMapping("/users")
     public ResponseEntity<?> saveUser(@Valid @RequestBody User user, BindingResult result) {
         if (result.hasErrors()) {
@@ -68,13 +101,15 @@ public class UserController {
             // Ghi nhật ký thành công
             logUtils.logAction("CREATE", "Thêm người dùng mới", user.getUsername());
             return ResponseEntity.status(HttpStatus.CREATED).body("Thêm người dùng thành công");
-        } catch (EmailAlreadyExistsException | UsernameAlreadyExistsException | RoleNotFoundException e) {
+        } catch (EmailAlreadyExistsException | UsernameAlreadyExistsException | RoleNotFoundException |
+                 AuthorizationServiceException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
+    @PreAuthorize("hasAuthority('EDIT_USER')")
     @PutMapping("/users/{id}")
     public ResponseEntity<String> updateUser(@PathVariable("id") Long id, @RequestBody User user) {
         try {
@@ -87,18 +122,20 @@ public class UserController {
         }
     }
 
+    @PreAuthorize("hasAuthority('VIEW_USER')")
     @GetMapping("/users/{id}")
-    public ResponseEntity<?> get(@PathVariable("id") Long id) {
+    public ResponseEntity<?> getUserById(@PathVariable("id") Long id) {
         try {
             User user = userService.getById(id);
             // Ghi nhật ký
-//            logUtils.logAction("GET", "Fetched người dùng theo ID: " + id, user.getUsername());
+            logUtils.logAction("GET", "Fetched người dùng theo ID: " + id, user.getUsername());
             return ResponseEntity.ok(user);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
+    @PreAuthorize("hasAuthority('DELETE_USER')")
     @DeleteMapping("/users/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Long id) {
         try {
@@ -110,6 +147,16 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Không có User nào id là " + id);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi khi xóa User");
+        }
+    }
+
+    @PutMapping("users/assign-roles")
+    public ResponseEntity<String> assignRolesToUsers(@RequestBody AssignRoleRequest request) {
+        try {
+            userService.assignRolesToUsers(request.getUserIds(), request.getRoleIds());
+            return ResponseEntity.ok("Roles assigned successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error assigning roles.");
         }
     }
 

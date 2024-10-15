@@ -1,0 +1,11 @@
+.datatable .cellAction .addUserButton {
+    padding: 2px 5px;
+    border-radius: 5px;
+    color: rgb(29, 165, 51);
+    cursor: pointer;
+    display: inline;
+  }
+
+  .datatable .cellAction .addUserButton:hover {
+    color: green;
+  }

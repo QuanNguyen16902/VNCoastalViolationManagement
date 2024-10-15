@@ -1,10 +1,10 @@
-
+import { getToken } from "../utils/auth";
 export default function authHeader() {
-    const user = JSON.parse(localStorage.getItem("user"))
+  const token = getToken();
 
-    if(user && user.accessToken) {
-        return { Authorization: 'Bearer ' + user.accessToken };
-    }else{
-        return {};
-    }
+  if (token) {
+    return { Authorization: "Bearer " + token };
+  } else {
+    return {};
+  }
 }

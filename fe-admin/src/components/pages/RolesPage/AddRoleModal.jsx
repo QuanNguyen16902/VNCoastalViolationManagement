@@ -1,48 +1,74 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
-import { Field, Form, Formik } from 'formik';
-import React from 'react';
-import { toast } from 'react-toastify';
-import * as Yup from 'yup';
-import roleService from '../../../service/role.service';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+} from "@mui/material";
+import { Field, Form, Formik } from "formik";
+import React from "react";
+import { toast } from "react-toastify";
+import * as Yup from "yup";
+import roleService from "../../../service/role.service";
 
 const validationSchema = Yup.object({
-  name: Yup.string().required('Chưa điền tên quyền'),
-  link: Yup.string().required('Chưa điền link'),
-  description: Yup.string().required('Chưa điền mô tả'),
+  name: Yup.string().required("Chưa điền tên quyền"),
+  link: Yup.string().required("Chưa điền link"),
+  description: Yup.string().required("Chưa điền mô tả"),
 });
 
 function AddRoleDialog({ open, onClose, onAddRole }) {
-
   const handleSubmit = async (values) => {
     try {
-      
-      await roleService.addRole(values);
-      toast.success('Thêm quyền thành công!');
-      onAddRole(); 
-      onClose();
-      
+      const response = await roleService.addRole(values);
+      console.log(response);
+      if (response.status === 200 || response.status === 201) {
+        const role = response.data; // Lấy role từ phản hồi
+        toast.success(`Thêm quyền thành công: ${role.name}`);
+        onAddRole(); // Cập nhật lại danh sách quyền nếu cần
+        onClose(); // Đóng dialog
+      } else {
+        throw new Error("Thêm quyền thất bại");
+      }
     } catch (error) {
-      const errorMessage = error.response?.data;
-      console.log(error.response)
+      let errorMessage = "Đã xảy ra lỗi!";
+
+      if (error.response) {
+        errorMessage = error.response.data?.message || "Có lỗi xảy ra!";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       toast.error(errorMessage);
     }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} aria-labelledby="add-role-dialog-title"  
+    <Dialog
+      open={open}
+      onClose={onClose}
+      aria-labelledby="add-role-dialog-title"
     >
       <DialogTitle id="add-role-dialog-title">Thêm Quyền</DialogTitle>
       <DialogContent>
         <Formik
           initialValues={{
-            name: '',
-            link: '',
-            description: '',
+            name: "",
+            link: "",
+            description: "",
           }}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ values, handleChange, handleBlur, setFieldValue, errors, touched }) => (
+          {({
+            values,
+            handleChange,
+            handleBlur,
+            setFieldValue,
+            errors,
+            touched,
+          }) => (
             <Form id="add-role-form">
               <Field
                 as={TextField}
@@ -70,8 +96,8 @@ function AddRoleDialog({ open, onClose, onAddRole }) {
                 error={touched.link && Boolean(errors.link)}
                 helperText={touched.link && errors.link}
               />
-             
-               <TextField
+
+              <TextField
                 id="outlined-multiline-static"
                 name="description"
                 label="Mô tả"

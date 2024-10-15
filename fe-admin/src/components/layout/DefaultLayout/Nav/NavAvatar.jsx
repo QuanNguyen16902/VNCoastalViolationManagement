@@ -1,32 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import authService from '../../../../service/auth.service';
-import '../../../pages/Auth/loading.css';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import authService from "../../../../service/auth.service";
+import { getUserFromToken } from "../../../../utils/auth";
+import "../../../pages/Auth/loading.css";
 function NavAvatar() {
-  const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const user = await authService.getCurrentUser(); // Giả sử đây là hàm async
-        setCurrentUser(user);
-      } catch (error) {
-        console.error("Error fetching current user:", error);
-      }
-    };
-
-    fetchCurrentUser();
-  }, []);
+  const currentUser = getUserFromToken();
 
   const handleLogout = async (event) => {
     event.preventDefault(); // Ngăn chặn hành vi mặc định của thẻ <a>
     setIsLoading(true); // Bắt đầu hiển thị loading
 
     try {
-      await authService.logout(); 
-      setCurrentUser(null);
+      await authService.logout();
 
       // Delay điều hướng sau khi loading
       setTimeout(() => {
@@ -40,72 +27,99 @@ function NavAvatar() {
   };
 
   return (
-    <li className='nav-item dropdown pe-3'>
+    <li className="nav-item dropdown pe-3">
       <a
         href="#"
         data-bs-toggle="dropdown"
-        className='nav-link nav-profile d-flex align-items-center pe-0'>
-        {/* <img src="#" alt='Profile' className='rounded-circle'/> */}
-        <span className='d-none d-md-block dropdown-toggle ps-2'>
-          {currentUser ? currentUser.username : 'Guest'}
+        className="nav-link nav-profile d-flex align-items-center pe-0"
+        style={{
+          maxWidth: "200px",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
+        <span className="d-none d-md-block dropdown-toggle ps-2">
+          {currentUser ? currentUser.username : "Guest"}
+          <img
+            src={
+              "https://th.bing.com/th/id/OIP.ghZN_FaqJ8PdAWZKqcsU0wHaE6?w=244&h=180&c=7&r=0&o=5&pid=1.7"
+            }
+            className="rounded-circle ms-1"
+            alt="Profile"
+          />
         </span>
       </a>
-      <ul className='dropdown-menu dropdown-menu-end dropdown-menu-arrow profile'>
-        <li className='dropdown-header'>
-          <h6>{currentUser ? currentUser.username : 'Guest'}</h6>
-          <span>
-            Quyền: {currentUser && Array.isArray(currentUser.authorities)
-              ? currentUser.authorities.map(role => role.authority).join(', ')
-              : 'N/A'}
+      <ul
+        className="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile"
+        style={{ minWidth: "250px" }}
+      >
+        <li
+          className="dropdown-header"
+          style={{ whiteSpace: "normal", wordWrap: "break-word" }}
+        >
+          <h6>{currentUser ? currentUser.username : "Guest"}</h6>
+          <span className="overflow">
+            Quyền:{" "}
+            {currentUser && Array.isArray(currentUser.roles)
+              ? currentUser.roles.map((role) => role.authority).join(", ")
+              : "N/A"}
           </span>
         </li>
         <li>
-          <hr className='dropdown-divider'/>
+          <hr className="dropdown-divider" />
         </li>
         <li>
-          <a className='dropdown-item d-flex align-items-center' href="#">
-            <i className='bi bi-person'></i>
+          <a className="dropdown-item d-flex align-items-center" href="#">
+            <i className="bi bi-person"></i>
             <span>Hồ sơ cá nhân</span>
           </a>
         </li>
         <li>
-          <hr className='dropdown-divider'/>
+          <hr className="dropdown-divider" />
         </li>
         <li>
-          <a className='dropdown-item d-flex align-items-center' href="#">
-            <i className='bi bi-gear'></i>
-            <span>Cài đặt tài khoản</span>
+          <a className="dropdown-item d-flex align-items-center" href="#">
+            <i className="bi bi-gear"></i>
+            <span>Đổi mật khẩu</span>
           </a>
         </li>
         <li>
-          <hr className='dropdown-divider'/>
+          <hr className="dropdown-divider" />
         </li>
         <li>
-          <a className='dropdown-item d-flex align-items-center' href="#">
-            <i className='bi bi-question-circle'></i>
+          <a className="dropdown-item d-flex align-items-center" href="#">
+            <i className="bi bi-question-circle"></i>
             <span>Hỗ trợ</span>
           </a>
         </li>
         <li>
-          <hr className='dropdown-divider'/>
+          <hr className="dropdown-divider" />
         </li>
         <li>
           {currentUser ? (
-            <a className='dropdown-item d-flex align-items-center' href="/login" onClick={handleLogout}>
-              <i className='bi bi-box-arrow-right'></i>
+            <a
+              className="dropdown-item d-flex align-items-center"
+              href="/login"
+              onClick={handleLogout}
+            >
+              <i className="bi bi-box-arrow-right"></i>
               <span>Đăng xuất</span>
             </a>
           ) : (
-            <a className='dropdown-item d-flex align-items-center' href="/login">
-              <i className='bi bi-box-arrow-right'></i>
+            <a
+              className="dropdown-item d-flex align-items-center"
+              href="/login"
+            >
+              <i className="bi bi-box-arrow-right"></i>
               <span>Đăng nhập</span>
             </a>
           )}
         </li>
       </ul>
       {isLoading && (
-        <div className='loading-overlay'>
-          <div className='spinner'></div> {/* Thay bằng spinner hoặc loading indicator của bạn */}
+        <div className="loading-overlay">
+          <div className="spinner"></div>
           <p>Đang đăng xuất...</p>
         </div>
       )}

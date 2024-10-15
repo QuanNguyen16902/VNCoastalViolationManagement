@@ -9,7 +9,7 @@ import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("${API_URL}")
 public class LogController {
     @Autowired
     private SystemLogService systemLogService;

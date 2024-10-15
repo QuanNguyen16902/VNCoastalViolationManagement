@@ -39,6 +39,15 @@ public class Role {
             inverseJoinColumns = @JoinColumn(name = "permission_id"))
     private Set<Permission> permissions = new HashSet<>();
 
+    public boolean hasPermission(String permissionName) {
+        for (Permission permission : permissions) {
+            if (permission.getName().equals(permissionName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public Role(Long id) {
         this.id = id;
     }
@@ -51,7 +60,10 @@ public class Role {
         this.name = name;
         this.description = description;
     }
-
+    public Role(String name, Set<Permission> permissions) {
+        this.name = name;
+        this.permissions = permissions;
+    }
     @Override
     public int hashCode() {
         return Objects.hash(id);

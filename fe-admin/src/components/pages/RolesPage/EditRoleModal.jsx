@@ -1,53 +1,94 @@
 import {
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
   TextField,
 } from "@mui/material";
 import { Field, Form, Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
+import permissionService from "../../../service/permission.service";
 import roleService from "../../../service/role.service";
 
 const validationSchema = Yup.object({
-  name: Yup.string().required('Chưa điền tên quyền'),
-  link: Yup.string().required('Chưa điền link'),
-  description: Yup.string().required('Chưa điền mô tả'),
+  name: Yup.string().required("Chưa điền tên quyền"),
+  link: Yup.string().required("Chưa điền link"),
+  description: Yup.string().required("Chưa điền mô tả"),
 });
 
 function EditRoleDialog({ open, onClose, onEditRole, roleId }) {
   const [role, setRole] = useState(null);
+  const [permissions, setPermissions] = useState([]);
 
   useEffect(() => {
+    const fetchPermissions = async () => {
+      try {
+        const responseData = await permissionService.getListPermissions();
+        setPermissions(responseData.data);
+        console.log(responseData);
+      } catch (e) {
+        toast.error(e);
+      }
+    };
+    fetchPermissions();
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
     if (roleId) {
       const fetchRole = async () => {
         try {
           const response = await roleService.getRole(roleId);
-          setRole(response.data);
+          if (isMounted) {
+            setRole(response.data);
+          }
         } catch (error) {
-          console.error("Lỗi khi tải quyền", error);
-          toast.error("Không thể tải dữ liệu quyền");
+          if (isMounted) {
+            console.error("Lỗi khi tải quyền", error);
+            toast.error("Không thể tải dữ liệu quyền");
+          }
         }
       };
+
       fetchRole();
     }
+    // Cleanup function để đảm bảo chỉ gọi khi component được mounted
+    return () => {
+      isMounted = false;
+    };
   }, [roleId]);
 
   const handleSubmit = async (values) => {
     try {
+      const permissionsData = values.permissions.map((permissionId) => {
+        const permission = permissions.find((perm) => perm.id === permissionId);
+        if (!permission) {
+          throw new Error(`Permission with ID ${permissionId} not found`);
+        }
+        return permission;
+      });
+
       const roleData = {
         ...values,
-        };
+        permissions: permissionsData,
+      };
+      console.log(roleData);
       await roleService.editRole(roleId, roleData);
       toast.success("Quyền đã được cập nhật thành công!");
       onEditRole();
       onClose();
     } catch (error) {
-      const errorMessage = error.response?.data;
-      console.log(error.response);
+      const errorMessage =
+        error.response?.data || error.message || "Có lỗi xảy ra";
+      console.error("Error updating role:", error); // Log the error for debugging
       toast.error(errorMessage);
     }
   };
@@ -66,10 +107,10 @@ function EditRoleDialog({ open, onClose, onEditRole, roleId }) {
               name: role.name || "",
               link: role.link || "",
               description: role.description || "",
+              permissions: role.permissions.map((role) => role.id) || [],
             }}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
-            
           >
             {({
               values,
@@ -122,6 +163,41 @@ function EditRoleDialog({ open, onClose, onEditRole, roleId }) {
                   error={touched.description && Boolean(errors.description)}
                   helperText={touched.description && errors.description}
                 />
+                <FormControl fullWidth margin="normal" variant="outlined">
+                  <InputLabel id="permissions-label">Permission</InputLabel>
+                  <Select
+                    label="Permissions"
+                    multiple
+                    value={values.permissions}
+                    onChange={(event) =>
+                      setFieldValue("permissions", event.target.value)
+                    }
+                    renderValue={(selected) =>
+                      selected
+                        .map(
+                          (id) =>
+                            permissions.find(
+                              (permission) => permission.id === id
+                            )?.name
+                        )
+                        .join(", ")
+                    }
+                    MenuProps={{
+                      PaperProps: {
+                        style: { maxHeight: 200 },
+                      },
+                    }}
+                  >
+                    {permissions.map((permission) => (
+                      <MenuItem key={permission.id} value={permission.id}>
+                        <Checkbox
+                          checked={values.permissions.includes(permission.id)}
+                        />
+                        {permission.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Form>
             )}
           </Formik>

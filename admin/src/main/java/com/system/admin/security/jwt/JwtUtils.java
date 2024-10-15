@@ -2,38 +2,44 @@ package com.system.admin.security.jwt;
 
 
 import com.system.admin.security.auth_service.UserDetailsImpl;
+import com.system.admin.service.SettingService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.time.Instant;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
+    @Autowired
+    private SettingService settingService;
 
-    @Value("${admin.api.jwtSecret}")
-    private String jwtSecret;
-
-    @Value("${admin.api.jwtExpirationMs}")
-    private int jwtExpirationMs;
+//    @Value("${admin.api.jwtSecret}")
+//    private String jwtSecret;
+//
+//    @Value("${admin.api.jwtExpirationMs}")
+//    private int jwtExpirationMs;
 
     public String generateJwtToken(UserDetailsImpl userPrincipal) {
-        return generateTokenFromUsername(userPrincipal.getUsername());
+        return generateTokenFromUsername(userPrincipal);
     }
     public String getUsernameFromJwtToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key()).build()
-                .parseClaimsJws(token).getBody().getSubject();
+                .parseClaimsJws(token).getBody().get("username", String.class);
     }
 
     private Key key() {
-        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(settingService.getJwtSecret()));
     }
 
     public boolean validateJwtToken(String authToken) {
@@ -58,22 +64,20 @@ public class JwtUtils {
         return false;
     }
 
-//    public String generateTokenFromUsername(String username) {
-//        return Jwts.builder()
-//                .setSubject(username)
-//                .setIssuedAt(new Date())
-//                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-//                .signWith(key(), SignatureAlgorithm.HS256)
-//                .compact();
-//    }
-    public String generateTokenFromUsername(String username) {
-        Date expirationDate = new Date(System.currentTimeMillis() + jwtExpirationMs);
-        logger.info("JWT expiration date: {}", expirationDate);
+    public String generateTokenFromUsername(UserDetailsImpl userPrincipal) {
+//        Date expirationDate = new Date(System.currentTimeMillis() + settingService.getJwtExpirationMs());
+//        logger.info("JWT expiration date: {}", expirationDate);
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
+        Date expiryDate = new Date(now.getTime() + settingService.getJwtExpirationMs() * 3600000L);
+        System.out.println(expiryDate);
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("id", userPrincipal.getId()); // Assuming getId() method exists
+        claims.put("username", userPrincipal.getUsername());
+        claims.put("email", userPrincipal.getEmail());
+        claims.put("roles", userPrincipal.getRoles());
 
         return Jwts.builder()
-                .setSubject(username)
+                .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(key(), SignatureAlgorithm.HS256)

@@ -1,6 +1,7 @@
 .login-container {
     height: 100vh;
-    background-color: #d3d3d3; /* Màu xám nhạt */
+    background: linear-gradient(to top, #e0f7fa, #133e66), 
+    url('../../../images/bg.jpg');
     display: flex;
     align-items: center;
     justify-content: center;
@@ -12,19 +13,29 @@
     background-color: #ffffff; /* Màu trắng */
     border-radius: 16px;
     overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   }
-  
   .login-image-container {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: #001f3f; /* Màu xanh dương đậm */
+    padding: 20px;
+    color: #ffffff; 
+    text-align: center;
+  }
+  .login-image-container h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px; /* Adds space between the title and the logo */
+    color: #ffffff;
   }
   
   .login-logo {
     max-width: 100%;
     max-height: 100%;
+    object-fit: contain;
   }
   
   .login-form-container {
@@ -33,7 +44,29 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    background-image: url("../../../images/image3.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
   }
+/* Overlay only on the background image */
+.login-form-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.805); /* Semi-transparent white only affecting the background */
+  z-index: 1;
+  pointer-events: none; /* Ensure it doesn’t block interaction */
+}
+
+/* Ensure form elements remain unaffected */
+.login-form-container * {
+  position: relative;
+  z-index: 2;
+}
   
   .header-text {
     text-align: center;
@@ -68,4 +101,24 @@
   .forgot-password-link:hover {
     text-decoration: underline; /* Add underline on hover */
   }
+  
+  .support-info {
+    padding: 15px; /* Add padding for spacing */
+    border-radius: 8px; /* Rounded corners for a softer look */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    
+  } 
+  
+  h5.fw-bold {
+    font-weight: 700; /* Bold for the title */
+    margin-bottom: 10px; /* Space below the title */
+  }
+  
+  p.fw-medium {
+    font-weight: 500; /* Slightly less bold than h5 */
+    margin: 5px 0; /* Vertical margin for spacing */
+    color: #333; /* Darker text color for readability */
+  }
+  
+
   

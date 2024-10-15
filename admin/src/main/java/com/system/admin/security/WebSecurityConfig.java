@@ -6,6 +6,7 @@ import com.system.admin.security.jwt.AuthTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -58,8 +59,29 @@ public class WebSecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/admin/auth/**").permitAll()
+                                .requestMatchers("/vnpay/**").permitAll()
+                                .requestMatchers("/vnpay/return").permitAll()
+                                .requestMatchers("/api/admin/users/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/admin/users/{id}").hasAuthority("VIEW_USER")
+                                .requestMatchers(HttpMethod.PUT, "/api/admin/users/{id}").hasAuthority("EDIT_USER")
+                                .requestMatchers(HttpMethod.DELETE, "/api/admin/users/{id}").hasAuthority("DELETE_USER")
+                                .requestMatchers(HttpMethod.POST, "/api/admin/users/{id}").hasAuthority("CREATE_USER")
+
+                                .requestMatchers(HttpMethod.GET, "/api/admin/roles").hasAuthority("VIEW_ROLE")
+                                .requestMatchers(HttpMethod.PUT, "/api/admin/roles/{id}").hasAuthority("EDIT_ROLE")
+                                .requestMatchers(HttpMethod.GET, "/api/admin/roles/{id}").hasAuthority("EDIT_ROLE")
+                                .requestMatchers(HttpMethod.POST, "/api/admin/roles").hasAuthority("CREATE_ROLE")
+                                .requestMatchers(HttpMethod.DELETE, "/api/admin/roles/{id}").hasAuthority("DELETE_ROLE")
+
+                                .requestMatchers(HttpMethod.GET, "/api/admin/users-group").hasAuthority("VIEW_GROUP")
+                                .requestMatchers(HttpMethod.PUT, "/api/admin/users-group/{id}").hasAuthority("EDIT_GROUP")
+                                .requestMatchers(HttpMethod.GET, "/api/admin/users-group/{id}").hasAuthority("EDIT_GROUP")
+                                .requestMatchers(HttpMethod.POST, "/api/admin/users-group").hasAuthority("CREATE_GROUP")
+                                .requestMatchers(HttpMethod.DELETE, "/api/admin/users-group/{id}").hasAuthority("DELETE_GROUP")
+
                                 .anyRequest().authenticated()
                 );
 

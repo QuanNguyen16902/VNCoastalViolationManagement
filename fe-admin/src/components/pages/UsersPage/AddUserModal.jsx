@@ -1,16 +1,32 @@
-import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Select, TextField } from '@mui/material';
-import { Field, Form, Formik } from 'formik';
-import React, { useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
-import * as Yup from 'yup';
-import RoleService from '../../../service/role.service';
-import userService from '../../../service/user.service';
+import {
+  Button,
+  Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+} from "@mui/material";
+import { Field, Form, Formik } from "formik";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import * as Yup from "yup";
+import RoleService from "../../../service/role.service";
+import userService from "../../../service/user.service";
 
 const validationSchema = Yup.object({
-  username: Yup.string().required('Tên người dùng bắt buộc'),
-  email: Yup.string().email('Email không đúng định dạng').required('Email bắt buộc'),
-  password: Yup.string().required('Mật khẩu bắt buộc'),
-  enabled: Yup.boolean().required('Trạng thái bắt buộc'),
+  username: Yup.string().required("Tên người dùng bắt buộc"),
+  email: Yup.string()
+    .email("Email không đúng định dạng")
+    .required("Email bắt buộc"),
+  password: Yup.string().required("Mật khẩu bắt buộc"),
+  enabled: Yup.boolean().required("Trạng thái bắt buộc"),
   // enabled: Yup.boolean().oneOf([true, false], 'Invalid enabled').required('enabled is required'),
 });
 
@@ -23,7 +39,7 @@ function AddUserModal({ open, onClose, onAddUser }) {
         const response = await RoleService.getRoles();
         setRoles(response.data);
       } catch (error) {
-        console.error("Failed to fetch roles", error);
+        console.error("Lỗi truy xuất quyền", error);
       }
     };
     fetchRoles();
@@ -33,37 +49,46 @@ function AddUserModal({ open, onClose, onAddUser }) {
     try {
       const userData = {
         ...values,
-        rolesName: roles.filter(role => values.roles.includes(role.id)).map(role => role.name)
+        // rolesName: roles.filter(role => values.roles.includes(role.id)).map(role => role.name)
       };
       await userService.addUser(userData);
-      toast.success('Người dùng đã được thêm thành công!');
-      onAddUser(); 
+      toast.success("Người dùng đã được thêm thành công!");
+      onAddUser();
       onClose();
-      
     } catch (error) {
       const errorMessage = error.response?.data;
-      console.log(error.response)
+      console.log(error.response);
       toast.error(errorMessage);
     }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} aria-labelledby="add-user-dialog-title"  
+    <Dialog
+      open={open}
+      onClose={onClose}
+      aria-labelledby="add-user-dialog-title"
     >
       <DialogTitle id="add-user-dialog-title">Thêm Người Dùng</DialogTitle>
       <DialogContent>
         <Formik
           initialValues={{
-            username: '',
-            email: '',
-            password: '',
+            username: "",
+            email: "",
+            password: "",
             roles: [],
-            enabled: true
+            enabled: true,
           }}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ values, handleChange, handleBlur, setFieldValue, errors, touched }) => (
+          {({
+            values,
+            handleChange,
+            handleBlur,
+            setFieldValue,
+            errors,
+            touched,
+          }) => (
             <Form id="add-user-form">
               <Field
                 as={TextField}
@@ -95,7 +120,7 @@ function AddUserModal({ open, onClose, onAddUser }) {
               <Field
                 as={TextField}
                 name="password"
-                label="Password"
+                label="Mật khẩu"
                 fullWidth
                 margin="normal"
                 variant="outlined"
@@ -107,20 +132,20 @@ function AddUserModal({ open, onClose, onAddUser }) {
                 type="password"
               />
               <FormControl fullWidth margin="normal" variant="outlined">
-                <InputLabel>enabled</InputLabel>
+                <InputLabel>Tình trạng</InputLabel>
                 <Select
                   name="enabled"
                   value={values.enabled}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  label="enabled"
+                  label="Tình trạng"
                 >
                   <MenuItem value={true}>Kích hoạt</MenuItem>
                   <MenuItem value={false}>Không kích hoạt</MenuItem>
                 </Select>
               </FormControl>
               <FormControl component="fieldset" margin="normal">
-              {/* <FormLabel>Chọn quyền</FormLabel> */}
+                {/* <FormLabel>Chọn quyền</FormLabel> */}
                 <FormGroup>
                   {roles.map((role) => (
                     <FormControlLabel
@@ -131,8 +156,8 @@ function AddUserModal({ open, onClose, onAddUser }) {
                           onChange={(event) => {
                             const updatedRoles = event.target.checked
                               ? [...values.roles, role.id]
-                              : values.roles.filter(id => id !== role.id);
-                            setFieldValue('roles', updatedRoles);
+                              : values.roles.filter((id) => id !== role.id);
+                            setFieldValue("roles", updatedRoles);
                           }}
                         />
                       }

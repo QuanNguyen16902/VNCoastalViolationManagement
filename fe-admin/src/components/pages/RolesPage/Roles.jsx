@@ -9,6 +9,7 @@ import {
 import { DataGrid } from "@mui/x-data-grid";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { useUserRoles } from "../../../hooks/useUserRoles";
 import {
   default as RoleService,
   default as roleService,
@@ -27,9 +28,13 @@ function Roles() {
   const [openEdit, setOpenEdit] = useState(false);
   const [editRoleId, setEditRoleId] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const roles = useUserRoles();
+  const canView = roles.includes("ROLE_ADMIN");
 
   // Fetch users with optional search keyword
-  const fetchRoles = async (keyword = '') => {
+  const fetchRoles = async (keyword = "") => {
+    setLoading(true);
     try {
       let response;
       if (keyword) {
@@ -42,11 +47,13 @@ function Roles() {
       }
     } catch (error) {
       console.error("Failed to fetch users", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchRoles(); // Fetch all users on initial load
+    fetchRoles();
   }, []);
 
   const handleDelete = async () => {
@@ -55,7 +62,15 @@ function Roles() {
       setData(data.filter((item) => item.id !== deleteId));
       toast.success("Xóa thành công!"); // Hiển thị thông báo thành công
     } catch (error) {
-      toast.error("Xóa không thành công!"); // Hiển thị thông báo lỗi nếu có lỗi
+      let errorMessage = "Đã xảy ra lỗi!";
+
+      if (error.response) {
+        errorMessage = error.response.data?.message || "Có lỗi xảy ra!";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      toast.error(errorMessage);
     } finally {
       setOpenDelete(false);
     }
@@ -78,23 +93,25 @@ function Roles() {
   };
   // Xử lý search
   const handleSearch = (keyword) => {
-    fetchRoles(keyword); 
+    fetchRoles(keyword);
   };
 
   const columns = [
     { field: "id", headerName: "ID", width: 70 },
     { field: "name", headerName: "Tên", width: 150 },
-    { field: "link", headerName: "Link", width: 230 },
+    { field: "link", headerName: "Link", width: 150 },
     { field: "description", headerName: "Mô tả", width: 230 },
   ];
 
   // Transforming the data to match the DataGrid's expected format
-  const rows = (searchResults.length > 0 ? searchResults : data).map((item) => ({
-    id: item.id,
-    name: item.name,
-    link: item.link,
-    description: item.description,
-  }));
+  const rows = (searchResults.length > 0 ? searchResults : data).map(
+    (item) => ({
+      id: item.id,
+      name: item.name,
+      link: item.link,
+      description: item.description,
+    })
+  );
 
   const actionColumn = [
     {
@@ -125,12 +142,46 @@ function Roles() {
       ),
     },
   ];
-
+  if (loading) {
+    return (
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (!canView) {
+    return (
+      <div className="d-flex justify-content-center align-items-center">
+        <div
+          className="text-center p-4"
+          style={{
+            borderRadius: "10px",
+            backgroundColor: "#e7f3fe",
+            border: "2px solid #007bff",
+            maxWidth: "500px",
+          }}
+        >
+          <i
+            className="bi bi-exclamation-octagon fw-bold text-primary"
+            style={{ fontSize: "48px" }}
+          ></i>
+          <h4 className="mt-3">Bạn không có quyền xem danh sách vai trò</h4>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="datatable">
       <div className="datatableTitle">
         Danh sách Quyền
-        <SearchField label={"Tra cứu Quyền"} onSearch={handleSearch}/>
+        <SearchField label={"Tra cứu Quyền"} onSearch={handleSearch} />
         <button className="link" onClick={() => setOpenAdd(true)}>
           <i className="bi bi-person-add hover"></i>&nbsp;
           <span>Thêm</span>
@@ -157,7 +208,7 @@ function Roles() {
         }}
         disableSelectionOnClick
       />
-      
+
       <Dialog
         open={openDelete}
         onClose={handleClose}

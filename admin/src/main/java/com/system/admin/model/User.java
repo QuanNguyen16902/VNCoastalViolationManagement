@@ -17,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 @Getter
 @Setter
@@ -50,6 +51,9 @@ public class User {
 
     private boolean enabled;
 
+    @Column(length = 64)
+    private String photos;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "users_roles",
@@ -58,9 +62,9 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
+
     @Transient
     private Set<String> rolesName;
-
 
     public User(String username, String email, String password, boolean enabled) {
         this.username = username;
@@ -68,4 +72,18 @@ public class User {
         this.password = password;
         this.enabled = enabled;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
 }
