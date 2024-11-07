@@ -29,9 +29,9 @@ function ForgotPasswordPage() {
       toast.success(response.data);
     } catch (error) {
       if (error.response && error.response.status === 400) {
-        toast.error(error.response.data || "Có lỗi xảy ra!");
+        toast.error(error.response.data || "Có lỗi xảy ra 123!");
       } else {
-        toast.error("Có lỗi xảy ra!");
+        toast.error(error.response.data);
       }
     } finally {
       setIsLoading(false);
@@ -76,19 +76,19 @@ function ForgotPasswordPage() {
             </Form>
           </Formik>
 
-          {isLoading && (
-            <div className="loading-overlay">
-              <div className="spinner"></div>
-              <p>Đang xử lý...</p>
-            </div>
-          )}
-
           <div className="text-center mt-3">
             <p>
               <a href="/login">Quay lại đăng nhập</a>
             </p>
           </div>
         </div>
+
+        {isLoading && (
+          <div className="loading-overlay">
+            <div className="spinner"></div>
+            <p>Đang xử lý...</p>
+          </div>
+        )}
       </div>
     </div>
   );

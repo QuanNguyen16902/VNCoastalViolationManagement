@@ -1,10 +1,12 @@
 package com.system.admin.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.system.admin.model.token.PasswordResetToken;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+//import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jdk.jfr.Name;
 import lombok.AllArgsConstructor;
@@ -15,10 +17,8 @@ import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.OnDelete;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -34,25 +34,28 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+//    @NotBlank
     @Size(max = 30)
     @Column(name = "username")
     private String username;
 
-    @NotBlank
+
+//    @NotBlank
     @Size(max = 50)
     @Column(name = "email")
     private String email;
 
-    @NotBlank
+//    @NotBlank
     @Size(max = 120)
     @Column(name = "password")
     private String password;
 
+
+
     private boolean enabled;
 
-    @Column(length = 64)
-    private String photos;
+//    @OneToOne(cascade = CascadeType.ALL)
+//    @JoinColumn(name = "photo_id", referencedColumnName = "id")
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -62,9 +65,39 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Profile profile;
+//
+//    @PostPersist
+//    public void createProfile() {
+//        if (this.profile == null) {
+//            Profile profile = new Profile();
+//            profile.setUser(this);
+//            profile.setId(this.id);
+////            profile.setFullName(this.username); // Hoặc giá trị khác tùy ý
+//            this.profile = profile;
+//        }
+//    }
 
-    @Transient
-    private Set<String> rolesName;
+    // Quan hệ OneToMany với PenaltyDecision
+    @OneToMany(mappedBy = "nguoiThiHanh")
+    @JsonIgnore
+    private List<PenaltyDecision> penaltyDecisions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Set<PasswordResetToken> passwordResetTokens = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Set<SystemLog> systemLogs = new HashSet<>();
+
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    @JsonIgnore
+//    private Set<Setting> settings = new HashSet<>();
+
+//    @Transient
+//    private Set<String> rolesName;
 
     public User(String username, String email, String password, boolean enabled) {
         this.username = username;

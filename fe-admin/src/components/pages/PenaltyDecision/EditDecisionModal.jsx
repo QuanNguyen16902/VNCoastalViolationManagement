@@ -9,47 +9,53 @@ import {
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import diaphuongData from "../../../data/diaphuong.json";
-import { Vipham } from "../../../data/dieukhoan";
+import { dieuKhoan } from "../../../data/dieukhoan";
 import decisionService from "../../../service/decision.service";
-
-const generateOptions = (data) => {
-  return data.map((item) => ({
-    label: `${item.noi_dung}`, // Đặt label cho điều
-    value: `${item.noi_dung}`, // Giá trị cho điều
-    options: item.Khoan.flatMap((khoan) => {
-      // Nếu có điểm, tạo mục riêng cho từng điểm
-      if (khoan.diem && khoan.diem.length > 0) {
-        // Các mục cho từng Điểm
-        const diemOptions = khoan.diem.map((diem) => ({
-          label: `Khoản ${khoan.noi_dung} Điểm ${diem.noi_dung}`, // Đặt label cho điểm
-          value: `${item.noi_dung}, Khoản ${khoan.noi_dung}, Điểm ${diem.noi_dung}`, // Giá trị cho điểm, bao gồm điều
-        }));
-
-        // Gộp mục Khoản và các mục Điểm lại
-        return [...diemOptions];
-      }
-      // Nếu không có điểm, chỉ trả về mục Khoản
-      return {
-        label: `Khoản ${khoan.noi_dung}`, // Đặt label cho khoản
-        value: `${item.noi_dung}, Khoản ${khoan.noi_dung}`, // Giá trị cho khoản, bao gồm điều
-      };
-    }),
-  }));
-};
-
-const options = generateOptions(Vipham);
-
+import userService from "../../../service/user.service";
+import violationService from "../../../service/violation.service";
 const years = [];
 for (let year = 1920; year <= 2024; year++) {
   years.push(year);
 }
 function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
   const [decision, setDecision] = useState(null);
+  const [currentUser, setCurrentUser] = useState("");
+  const [violationList, setViolationList] = useState([]);
+  const [userList, setUserList] = useState([]);
+  const [selectUserId, setSelectUserId] = useState(null);
+  const [mucPhatPlaceholder, setMucPhatPlacehoder] = useState("");
 
+  // danh sách select biên bản
+  const fetchViolation = async () => {
+    try {
+      const response = await violationService.getViolationList();
+      setViolationList(response.data);
+    } catch (error) {
+      toast.error(error.response.data);
+    }
+  };
+  useEffect(() => {
+    fetchViolation();
+    return () => {};
+  }, []);
+  // danh sách select người dùng
+  const fetchUser = async () => {
+    try {
+      const response = await userService.getUsers();
+      setUserList(response.data);
+    } catch (error) {
+      toast.error(error.response.data);
+    }
+  };
+  useEffect(() => {
+    fetchUser();
+    return () => {};
+  }, []);
   // State cho các trường chính
   const [mainData, setMainData] = useState({
     tenCoQuan: "",
-    soVanBan: "",
+    soQuyetDinh: "",
+    thoiGianLap: "",
     thanhPho: "",
     nghiDinh: "",
     xuPhatChinh: "",
@@ -59,6 +65,13 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
     viPhamDieuKhoan: "",
     hieuLucThiHanh: "",
     diaChiKhoBac: "",
+    bienBanViPham: {
+      id: "",
+      hanhVi: "",
+    },
+    nguoiThiHanh: {
+      id: "",
+    },
   });
 
   // State cho nguoiViPham
@@ -70,23 +83,17 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
     canCuoc: "",
     noiCap: "",
     ngayCap: "",
-    hanhVi: "",
+    quocTich: "",
   });
-
+  const [selectedViolationId, setSelectedViolationId] = useState("");
   // State cho nguoiThiHanh
   const [executor, setExecutor] = useState({
-    ten: "",
-    capBac: "",
-    chucVu: "",
-    donVi: "",
+    fullName: "",
+    rank: "",
+    position: "",
+    department: "",
   });
 
-  const handleSelectChange = (e) => {
-    setMainData({
-      ...mainData,
-      viPhamDieuKhoan: e.target.value,
-    });
-  };
   useEffect(() => {
     let isMounted = true; // Khai báo biến cờ
     const fetchDecision = async () => {
@@ -97,11 +104,10 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
             const newData = {
               ...response.data,
             };
-
             setDecision(response.data);
             setMainData(newData); // Đặt lại mainData với dữ liệu đã cập nhật hieuLucThiHanh
-            setViolationPerson(response.data.nguoiViPham);
-            setExecutor(response.data.nguoiThiHanh);
+            setViolationPerson(response.data.bienBanViPham.nguoiViPham);
+            setExecutor(response.data.nguoiThiHanh.profile);
 
             // Chuyển đổi hieuLucThiHanh về định dạng datetime-local
             const hieuLucThiHanhUTC = new Date(newData.hieuLucThiHanh);
@@ -109,14 +115,17 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
               hieuLucThiHanhUTC.getTime() -
                 hieuLucThiHanhUTC.getTimezoneOffset() * 60000
             );
+            const thoiGianLapUTC = new Date(newData.thoiGianLap);
+            const localThoiGianLap = new Date(
+              thoiGianLapUTC.getTime() -
+                thoiGianLapUTC.getTimezoneOffset() * 60000
+            );
 
             setMainData((prevData) => ({
               ...prevData,
               hieuLucThiHanh: localHieuLucThiHanh.toISOString().slice(0, 16), // Cập nhật hieuLucThiHanh ở định dạng YYYY-MM-DDTHH:MM
+              thoiGianLap: localThoiGianLap.toISOString().slice(0, 16), // Cập nhật hieuLucThiHanh ở định dạng YYYY-MM-DDTHH:MM
             }));
-
-            console.log("Hieu luc: ", newData.hieuLucThiHanh);
-            console.log("Hieu luc: ", newData);
           }
         } catch (error) {
           if (isMounted) {
@@ -135,10 +144,6 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
     const errors = {};
     if (!mainData.tenCoQuan || mainData.tenCoQuan.trim() === "") {
       errors.tenCoQuan = "Tên cơ quan không được để trống.";
-    }
-
-    if (!mainData.soVanBan || mainData.soVanBan.trim() === "") {
-      errors.soVanBan = "Số văn bản không được để trống.";
     }
 
     if (!mainData.thanhPho || mainData.thanhPho.trim() === "") {
@@ -219,45 +224,133 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
       errors.canCuoc = "Căn cước không được để trống.";
     }
 
-    // Validate executor fields
-    if (!executor.ten || executor.ten.trim() === "") {
-      errors.ten = "Tên người thi hành không được để trống.";
-    }
-
-    if (!executor.donVi || executor.donVi.trim() === "") {
-      errors.donVi = "Đơn vị không được để trống.";
-    }
-
     return errors;
   };
 
   // Xử lý thay đổi cho các trường chính
   const handleMainChange = (e) => {
     const { name, value } = e.target;
+    const defaultText = "/QĐ-XPVPHC";
+
     setMainData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]:
+        name === "soQuyetDinh"
+          ? value.replace(defaultText, "") // Loại bỏ hậu tố trước khi lưu
+          : value,
     }));
   };
 
-  // Xử lý thay đổi cho nguoiViPham
-  const handleViolationPersonChange = (e) => {
-    const { name, value } = e.target;
-    setViolationPerson({
-      ...violationPerson,
-      [name]: value,
-    });
+  useEffect(() => {
+    const fetchViolationPerson = async () => {
+      if (selectedViolationId) {
+        try {
+          const response =
+            await violationService.getViolationPersonByViolationId(
+              selectedViolationId
+            );
+          const violationPersonData = response.data.nguoiViPham;
+          setViolationPerson(violationPersonData);
+        } catch (error) {
+          console.error("Error fetching violation person data:", error);
+          // Xử lý lỗi nếu cần
+        }
+      }
+    };
+
+    fetchViolationPerson();
+  }, [selectedViolationId]); // Chạy effect này khi selectedViolationId thay đổi
+
+  const handleViolationPersonChange = async (e) => {
+    const { value, name } = e.target;
+    try {
+      // Gọi API để lấy thông tin người vi phạm
+      const response = await violationService.getViolationPersonByViolationId(
+        value
+      );
+      const response2 = await violationService.getViolation(value);
+      // Cập nhật state với thông tin người vi phạm
+      setViolationPerson(response.data);
+
+      // Tìm điều khoản phù hợp từ dieuKhoan.js dựa trên viPhamDieuKhoan
+      const matchedDieu = dieuKhoan.find((dieu) =>
+        response2.data.viPhamDieuKhoan.includes(dieu.noi_dung)
+      );
+      let xuPhatChinh = "Chưa có thông tin xử phạt";
+      let xuPhatBoSung = "Chưa có";
+      let bienPhapKhacPhuc = "Chưa có";
+
+      if (matchedDieu) {
+        const matchedKhoan = matchedDieu.Khoan.find((khoan) =>
+          response2.data.viPhamDieuKhoan.includes(khoan.noi_dung)
+        );
+
+        if (matchedKhoan) {
+          setMucPhatPlacehoder(matchedKhoan.muc_phat);
+
+          const fineMatch = matchedKhoan.noi_dung.match(
+            /Phạt tiền từ ([\d.]+) đồng đến ([\d.]+) đồng/
+          );
+          if (fineMatch) {
+            xuPhatChinh = `Phạt tiền từ ${fineMatch[1]} đồng đến ${fineMatch[2]} đồng`;
+          }
+          xuPhatBoSung = matchedKhoan.hasHinhThucXuPhatBoSung
+            ? matchedDieu.hinhThucXuPhatBoSung
+            : "Chưa có";
+          bienPhapKhacPhuc = matchedKhoan.hasBienPhapKhacPhuc
+            ? matchedDieu.bienPhapKhacPhuc
+            : "Chưa có";
+        }
+      }
+
+      // Cập nhật mainData với thông tin điều khoản và vi phạm
+      setMainData({
+        ...mainData,
+        bienBanViPham: {
+          ...mainData.bienBanViPham,
+          id: value,
+          hanhVi: response2.data.hanhVi,
+          viPhamDieuKhoan: response2.data.viPhamDieuKhoan,
+        },
+        xuPhatChinh,
+        xuPhatBoSung,
+        bienPhapKhacPhuc,
+      });
+    } catch (error) {
+      console.error(
+        "Error fetching violation person data:",
+        error.response.data
+      );
+    }
   };
 
-  // Xử lý thay đổi cho nguoithihanh
-  const handleExecutorChange = (e) => {
-    const { name, value } = e.target;
-    setExecutor({
-      ...executor,
-      [name]: value,
-    });
-  };
+  const handleSelectExecutorChange = async (e) => {
+    const selectedUserId = e.target.value; // Sử dụng selectedUserId
+    console.log(selectedUserId); // Sửa lại biến
 
+    try {
+      const response = await userService.getUser(selectedUserId);
+      const selectedUser = response.data.profile;
+      if (selectedUser) {
+        setExecutor({
+          id: selectedUserId, // Sử dụng selectedUserId
+          fullName: selectedUser?.fullName || "",
+          rank: selectedUser?.rank || "",
+          position: selectedUser?.position || "",
+          department: selectedUser?.department || "",
+        });
+        setMainData((prevState) => ({
+          ...prevState,
+          nguoiThiHanh: {
+            ...prevState.nguoiThiHanh.profile,
+            id: selectedUserId, // Cập nhật ID đúng
+          },
+        }));
+      }
+    } catch (error) {
+      toast.error(error.response.data || "Lỗi truy xuất người dùng");
+    }
+  };
   // Xử lý submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -277,17 +370,20 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
     }));
     const payload = {
       ...mainData,
-      hieuLucThiHanh: new Date(mainData.hieuLucThiHanh)
-        .toISOString()
-        .slice(0, 16), // Cập nhật hieuLucThiHanh ở định dạng YYYY-MM-DDTHH:MM
-      nguoiViPham: {
-        ...violationPerson,
-        namSinh: Number(violationPerson.namSinh),
+      thoiGianLap: new Date(mainData.thoiGianLap).toISOString(), // Chuyển đổi sang định dạng ISO
+      hieuLucThiHanh: new Date(mainData.hieuLucThiHanh).toISOString(),
+      bienBanViPham: {
+        ...mainData.bienBanViPham,
+        nguoiViPham: {
+          ...violationPerson,
+          namSinh: Number(violationPerson.namSinh),
+        },
       },
-      nguoiThiHanh: {
-        ...executor,
+      executor: {
+        id: selectUserId,
       },
     };
+    console.log("Payload: " + payload);
 
     try {
       const response = await decisionService.editDecision(decisionId, payload);
@@ -297,13 +393,15 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
       onClose();
     } catch (error) {
       console.error("Lỗi khi cập nhật quyết định xử phạt", error);
-      toast.error("Lỗi cập nhật quyết định xử phạt, hãy thử lại.");
+      toast.error(
+        error.response.data || "Lỗi cập nhật quyết định xử phạt, hãy thử lại."
+      );
     }
   };
 
   return (
     <Dialog
-      maxWidth="xl"
+      maxWidth="lg"
       fullWidth
       open={open}
       onClose={onClose}
@@ -332,12 +430,13 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
       <Divider />
       <DialogContent>
         {decision ? (
-          <div className="container mt-2 mb-20">
+          <div id="box" className="bg-white ps-5 pe-lg-5 pt-4">
             <h1 className="text-center fw-700 mb-3">
               Quyết định xử phạt (ID: {decisionId})
             </h1>
             <form onSubmit={handleSubmit}>
               {/* Các trường chính */}
+              {/* Thông Tin Văn Bản */}
               {/* Thông Tin Văn Bản */}
               <fieldset style={{ marginBottom: "20px" }}>
                 <div className="mb-3 row">
@@ -349,10 +448,28 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                 </div>
 
                 <div className="row">
-                  <div className="col-md-6">
+                  <div className="col-md-4">
+                    <label className="form-label">Căn cứ vào biên bản</label>
+                    <select
+                      id="violationId"
+                      name="violationId"
+                      className="form-select"
+                      value={mainData.bienBanViPham?.id}
+                      onChange={handleViolationPersonChange}
+                      readOnly
+                    >
+                      <option value="">Chọn mã biên bản</option>
+                      {violationList.map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.soVanBan}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-md-4">
                     <div className="mb-3">
                       <label htmlFor="tenCoQuan" className="form-label">
-                        Tên cơ quan hành chính
+                        Tên cơ quan hành chính:
                       </label>
                       <input
                         type="text"
@@ -365,18 +482,17 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                       />
                     </div>
                   </div>
-
-                  <div className="col-md-6">
+                  <div className="col-md-4">
                     <div className="mb-3">
-                      <label htmlFor="soVanBan" className="form-label">
-                        Số văn bản
+                      <label htmlFor="soQuyetDinh" className="form-label">
+                        Số quyết định:
                       </label>
                       <input
                         type="text"
-                        id="soVanBan"
-                        name="soVanBan"
+                        id="soQuyetDinh"
+                        name="soQuyetDinh"
                         className="form-control"
-                        value={mainData.soVanBan}
+                        value={mainData.soQuyetDinh + "/QĐ-XPVPHC"}
                         onChange={handleMainChange}
                         required
                       />
@@ -385,10 +501,10 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                 </div>
 
                 <div className="row">
-                  <div className="col-md-6">
+                  <div className="col-md-4">
                     <div className="mb-3">
                       <label htmlFor="thanhPho" className="form-label">
-                        Thành phố
+                        Thành phố:
                       </label>
                       <select
                         id="thanhPho"
@@ -408,10 +524,10 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                     </div>
                   </div>
 
-                  <div className="col-md-6">
+                  <div className="col-md-4">
                     <div className="mb-3">
                       <label htmlFor="nghiDinh" className="form-label">
-                        Căn cứ vào Nghị Định
+                        Căn cứ vào Nghị Định:
                       </label>
                       <input
                         type="text"
@@ -419,6 +535,21 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                         name="nghiDinh"
                         className="form-control"
                         value={mainData.nghiDinh}
+                        onChange={handleMainChange}
+                      />
+                    </div>
+                  </div>
+                  <div className="col-md-4">
+                    <div className="mb-3">
+                      <label htmlFor="thoiGianLap" className="form-label">
+                        Thời gian lập:
+                      </label>
+                      <input
+                        type="datetime-local"
+                        id="thoiGianLap"
+                        name="thoiGianLap"
+                        className="form-control"
+                        value={mainData.thoiGianLap}
                         onChange={handleMainChange}
                       />
                     </div>
@@ -435,70 +566,83 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                     </b>
                   </h4>
                 </div>
-
                 <div className="row">
-                  <div className="col-md-6">
-                    <div className="mb-3">
-                      <label htmlFor="ten" className="form-label">
-                        Tên
-                      </label>
-                      <input
-                        type="text"
-                        id="ten"
-                        name="ten"
-                        className="form-control"
-                        value={executor?.ten}
-                        onChange={handleExecutorChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="mb-3">
-                      <label htmlFor="capBac" className="form-label">
-                        Cấp bậc
-                      </label>
-                      <input
-                        type="text"
-                        id="capBac"
-                        name="capBac"
-                        className="form-control"
-                        value={executor?.capBac}
-                        onChange={handleExecutorChange}
-                        required
-                      />
-                    </div>
+                  <div className="col-sm-3">
+                    <select
+                      id="nguoiThihanh"
+                      name="nguoiThihanh"
+                      className="form-select"
+                      onChange={handleSelectExecutorChange}
+                      // value={mainData.nguoiThiHanh.id}
+                    >
+                      <option value="">Chọn mã cán bộ</option>
+                      {userList.map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.id} - {item.profile?.fullName || ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-3 mb-3">
+                    <label htmlFor="fullName" className="form-label">
+                      Tên:
+                    </label>
+                    <input
+                      type="text"
+                      id="fullName"
+                      name="fullName"
+                      className="form-control"
+                      value={executor.fullName}
+                      // onChange={handleExecutorChange}
+                      readOnly
+                    />
                   </div>
 
-                  <div className="col-md-6">
-                    <div className="mb-3">
-                      <label htmlFor="chucVu" className="form-label">
-                        Chức vụ
-                      </label>
-                      <input
-                        type="text"
-                        id="chucVu"
-                        name="chucVu"
-                        className="form-control"
-                        value={executor?.chucVu}
-                        onChange={handleExecutorChange}
-                        required
-                      />
-                    </div>
+                  <div className="col-md-3 mb-3">
+                    <label htmlFor="rank" className="form-label">
+                      Cấp bậc:
+                    </label>
+                    <input
+                      type="text"
+                      id="rank"
+                      name="rank"
+                      className="form-control"
+                      value={executor.rank}
+                      // onChange={handleExecutorChange}
+                      readOnly
+                    />
+                  </div>
 
-                    <div className="mb-3">
-                      <label htmlFor="donVi" className="form-label">
-                        Đơn vị
-                      </label>
-                      <input
-                        type="text"
-                        id="donVi"
-                        name="donVi"
-                        className="form-control"
-                        value={executor?.donVi}
-                        onChange={handleExecutorChange}
-                        required
-                      />
-                    </div>
+                  <div className="col-md-3 mb-3">
+                    <label htmlFor="position" className="form-label">
+                      Chức vụ:
+                    </label>
+                    <input
+                      type="text"
+                      id="position"
+                      name="position"
+                      className="form-control"
+                      value={executor.position}
+                      // onChange={handleExecutorChange}
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="col-md-3 mb-3">
+                    <label htmlFor="department" className="form-label">
+                      Đơn vị:
+                    </label>
+                    <input
+                      type="text"
+                      id="department"
+                      name="department"
+                      className="form-control"
+                      value={executor.department}
+                      // onChange={handleExecutorChange}
+                      readOnly
+                    />
                   </div>
                 </div>
               </fieldset>
@@ -520,7 +664,7 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                         htmlFor="nguoiViPham"
                         className="col-sm-4 col-form-label"
                       >
-                        Người vi phạm
+                        Tên người/tổ chức vi phạm
                       </label>
                       <div className="col-sm-8">
                         <input
@@ -528,8 +672,8 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                           id="nguoiViPham"
                           name="nguoiViPham"
                           className="form-control"
-                          value={violationPerson?.nguoiViPham}
-                          onChange={handleViolationPersonChange}
+                          value={violationPerson.nguoiViPham}
+                          // onChange={handleViolationPersonChange}
                           required
                         />
                       </div>
@@ -548,8 +692,8 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                           id="namSinh"
                           name="namSinh"
                           className="form-select"
-                          value={violationPerson?.namSinh}
-                          onChange={handleViolationPersonChange}
+                          value={violationPerson.namSinh}
+                          // onChange={handleViolationPersonChange}
                           required
                         >
                           <option value="">Chọn năm sinh</option>
@@ -576,29 +720,8 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                           id="ngheNghiep"
                           name="ngheNghiep"
                           className="form-control"
-                          value={violationPerson?.ngheNghiep}
-                          onChange={handleViolationPersonChange}
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    {/* Địa chỉ */}
-                    <div className="mb-3 row">
-                      <label
-                        htmlFor="diaChi"
-                        className="col-sm-4 col-form-label"
-                      >
-                        Địa chỉ:
-                      </label>
-                      <div className="col-sm-8">
-                        <input
-                          type="text"
-                          id="diaChi"
-                          name="diaChi"
-                          className="form-control"
-                          value={violationPerson?.diaChi}
-                          onChange={handleViolationPersonChange}
+                          value={violationPerson.ngheNghiep}
+                          // onChange={handleViolationPersonChange}
                           required
                         />
                       </div>
@@ -610,7 +733,7 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                         htmlFor="canCuoc"
                         className="col-sm-4 col-form-label"
                       >
-                        CCCD hoặc Mã số thuế
+                        CCCD hoặc Mã số thuế:
                       </label>
                       <div className="col-sm-8">
                         <input
@@ -618,8 +741,8 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                           id="canCuoc"
                           name="canCuoc"
                           className="form-control"
-                          value={violationPerson?.canCuoc}
-                          onChange={handleViolationPersonChange}
+                          value={violationPerson.canCuoc}
+                          // onChange={handleViolationPersonChange}
                           required
                         />
                       </div>
@@ -641,8 +764,8 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                           id="noiCap"
                           name="noiCap"
                           className="form-select"
-                          value={violationPerson?.noiCap}
-                          onChange={handleViolationPersonChange}
+                          value={violationPerson.noiCap}
+                          // onChange={handleViolationPersonChange}
                           required
                         >
                           <option value="">Chọn nơi cấp</option>
@@ -669,38 +792,54 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                           id="ngayCap"
                           name="ngayCap"
                           className="form-control"
-                          value={violationPerson?.ngayCap}
-                          onChange={handleViolationPersonChange}
+                          value={violationPerson.ngayCap}
+                          // onChange={handleViolationPersonChange}
                           required
                         />
                       </div>
                     </div>
-
-                    {/* Hành vi vi phạm */}
                     <div className="mb-3 row">
                       <label
-                        htmlFor="hanhVi"
+                        htmlFor="diaChi"
                         className="col-sm-4 col-form-label"
                       >
-                        Hành vi vi phạm:
+                        Địa chỉ:
                       </label>
                       <div className="col-sm-8">
-                        <textarea
-                          rows="3"
-                          id="hanhVi"
-                          name="hanhVi"
+                        <input
+                          type="text"
+                          id="diaChi"
+                          name="diaChi"
                           className="form-control"
-                          value={violationPerson?.hanhVi}
-                          onChange={handleViolationPersonChange}
+                          value={violationPerson.diaChi}
+                          // onChange={handleViolationPersonChange}
                           required
-                        ></textarea>
+                        />
+                      </div>
+                    </div>
+                    <div className="mb-3 row">
+                      <label
+                        htmlFor="quocTich"
+                        className="col-sm-4 col-form-label"
+                      >
+                        Quốc tịch:
+                      </label>
+                      <div className="col-sm-8">
+                        <input
+                          type="text"
+                          id="quocTich"
+                          name="quocTich"
+                          className="form-control"
+                          value={violationPerson.quocTich}
+                          // onChange={handleViolationPersonChange}
+                        />
                       </div>
                     </div>
                   </div>
                 </div>
               </fieldset>
 
-              {/* Các trường ý kiến */}
+              {/* Các trường xử phạt */}
               <fieldset style={{ marginBottom: "20px" }}>
                 <legend>
                   <h4>
@@ -710,11 +849,42 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                   </h4>
                 </legend>
                 <div className="mb-3 row">
+                  <label htmlFor="hanhVi" className="col-sm-3 col-form-label">
+                    Hành vi vi phạm hành chính:
+                  </label>
+                  <div className="col-sm-9">
+                    <textarea
+                      id="hanhVi"
+                      name="hanhVi"
+                      className="form-control"
+                      value={mainData.bienBanViPham?.hanhVi}
+                      onChange={handleMainChange}
+                    ></textarea>
+                  </div>
+                </div>
+                <div className="mb-3 row">
+                  <label
+                    htmlFor="viPhamDieuKhoan"
+                    className="col-sm-3 col-form-label"
+                  >
+                    Quy định tại:
+                  </label>
+                  <div className="col-sm-9">
+                    <textarea
+                      id="viPhamDieuKhoan"
+                      name="viPhamDieuKhoan"
+                      className="form-control"
+                      value={mainData.bienBanViPham.viPhamDieuKhoan}
+                      onChange={handleMainChange}
+                    />
+                  </div>
+                </div>
+                <div className="mb-3 row">
                   <label
                     htmlFor="xuPhatChinh"
                     className="col-sm-3 col-form-label"
                   >
-                    Hình thức xử phạt chính
+                    Hình thức xử phạt chính:
                   </label>
                   <div className="col-sm-9">
                     <textarea
@@ -722,8 +892,9 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                       name="xuPhatChinh"
                       className="form-control"
                       value={mainData.xuPhatChinh}
+                      // value={mainData.bienBanViPham.viPhamDieuKhoan}
                       onChange={handleMainChange}
-                    />
+                    ></textarea>
                   </div>
                 </div>
                 <div className="mb-3 row">
@@ -731,7 +902,7 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                     htmlFor="xuPhatBoSung"
                     className="col-sm-3 col-form-label"
                   >
-                    Hình thức xử phạt bổ sung
+                    Hình thức xử phạt bổ sung:
                   </label>
                   <div className="col-sm-9">
                     <textarea
@@ -745,7 +916,7 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                 </div>
                 <div className="mb-3 row">
                   <label htmlFor="mucPhat" className="col-sm-3 col-form-label">
-                    Mức phạt
+                    Mức phạt:
                   </label>
                   <div className="col-sm-9">
                     <input
@@ -754,6 +925,7 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                       className="form-control"
                       value={mainData.mucPhat}
                       onChange={handleMainChange}
+                      placeholder={mucPhatPlaceholder}
                     />
                   </div>
                 </div>
@@ -763,10 +935,11 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                     htmlFor="bienPhapKhacPhuc"
                     className="col-sm-3 col-form-label"
                   >
-                    Biện pháp khắc phục hậu quả
+                    Biện pháp khắc phục hậu quả:
                   </label>
                   <div className="col-sm-9">
-                    <input
+                    <textarea
+                      rows="2"
                       type="text"
                       id="bienPhapKhacPhuc"
                       name="bienPhapKhacPhuc"
@@ -776,63 +949,12 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                     />
                   </div>
                 </div>
-
-                <div className="mb-3 row">
-                  <label htmlFor="hanhVi" className="col-sm-3 col-form-label">
-                    Hành vi vi phạm hành chính
-                  </label>
-                  <div className="col-sm-9">
-                    <textarea
-                      type="text"
-                      id="hanhVi"
-                      name="hanhVi"
-                      className="form-control"
-                      value={violationPerson.hanhVi}
-                      onChange={handleMainChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="mb-3 row">
-                  <label htmlFor="tamGiu" className="col-sm-3 col-form-label">
-                    Quy định tại
-                  </label>
-                  <div className="col-sm-9">
-                    <select
-                      id="viPhamDieuKhoan"
-                      name="viPhamDieuKhoan"
-                      className="form-select"
-                      value={mainData.viPhamDieuKhoan}
-                      onChange={handleSelectChange} // Giữ nguyên hàm xử lý thay đổi
-                    >
-                      <option value="">Chọn điều, khoản, điểm</option>
-                      {options.map((option) => (
-                        <optgroup
-                          title={option.value}
-                          label={option.label}
-                          key={option.value}
-                        >
-                          {option.options.map((subOption) => (
-                            <option
-                              title={subOption.value}
-                              value={subOption.value}
-                              key={subOption.value}
-                            >
-                              {subOption.label}
-                            </option>
-                          ))}
-                        </optgroup>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
                 <div className="mb-3 row">
                   <label
                     htmlFor="hieuLucThiHanh"
                     className="col-sm-3 col-form-label"
                   >
-                    Có hiệu lực từ ngày
+                    Có hiệu lực từ ngày:
                   </label>
                   <div className="col-sm-9">
                     <input
@@ -840,7 +962,7 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                       id="hieuLucThiHanh"
                       name="hieuLucThiHanh"
                       className="form-control"
-                      value={mainData.hieuLucThiHanh || ""}
+                      value={mainData.hieuLucThiHanh}
                       onChange={handleMainChange}
                     />
                   </div>
@@ -850,11 +972,11 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                     htmlFor="diaChiKhoBac"
                     className="col-sm-3 col-form-label"
                   >
-                    Địa chỉ Kho bạc Nhà nước
+                    Địa chỉ Kho bạc Nhà nước:
                   </label>
                   <div className="col-sm-9">
                     <input
-                      type="datetime"
+                      type="text"
                       id="diaChiKhoBac"
                       name="diaChiKhoBac"
                       className="form-control"
@@ -864,7 +986,6 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                   </div>
                 </div>
               </fieldset>
-
               {/* Nút Submit */}
               <div className="text-center">
                 <button type="submit" className="btn btn-primary">

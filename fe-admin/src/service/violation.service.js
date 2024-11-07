@@ -7,6 +7,12 @@ class ViolationService {
   getViolationList() {
     return axios.get(API_URL + "violation-records", { headers: authHeader() });
   }
+  getViolationPages(page, size) {
+    return axios.get(API_URL + "violation-records/pageable", {
+      params: { page, size },
+      headers: authHeader(),
+    });
+  }
   deleteViolation(id) {
     return axios.delete(API_URL + `violation-records/${id}`, {
       headers: authHeader(),
@@ -28,6 +34,11 @@ class ViolationService {
       headers: authHeader(),
     });
   }
+  getViolationPersonByViolationId(id) {
+    return axios.get(API_URL + `violation-records/${id}/violation-person`, {
+      headers: authHeader(),
+    });
+  }
   changeResolved(id, resolved) {
     return axios.put(
       API_URL + `violation-records/${id}/resolved/${resolved}`,
@@ -36,6 +47,18 @@ class ViolationService {
         headers: authHeader(),
       }
     );
+  }
+  searchViolation(queryParams) {
+    return axios.get(API_URL + "violation-records/search", {
+      params: queryParams,
+      headers: authHeader(),
+    });
+  }
+  exportViolation(id) {
+    return axios.get(API_URL + `export/violations/pdf/${id}`, {
+      headers: authHeader(),
+      responseType: "blob",
+    });
   }
 }
 

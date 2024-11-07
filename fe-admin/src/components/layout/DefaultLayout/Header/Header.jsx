@@ -6,8 +6,8 @@ function Header() {
     <div>
       <header
         id="header"
-        className="header fixed-top d-flex align-items-center"
-        style={{ backgroundColor: "#E4EBF3" }}
+        className="header fixed-top d-flex align-items-center pb-1"
+        // style={{ backgroundColor: "#E4EBF3" }}
       >
         <Logo />
         <Nav />

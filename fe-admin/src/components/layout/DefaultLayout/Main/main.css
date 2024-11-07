@@ -5,6 +5,7 @@
     transition: all 0.3s;
     margin-bottom: 10px;
  }
+ 
  @media (max-width: 1199px) {
     #main {
         padding: 10px;

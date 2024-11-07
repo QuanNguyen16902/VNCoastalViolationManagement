@@ -1,7 +1,12 @@
 package com.system.admin.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.system.admin.model.ViolationRecord.ViolationPerson;
+import com.system.admin.model.ViolationRecord.ViolationRecord;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,24 +17,23 @@ import java.util.Date;
 @Setter
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "penalty-decision")
 public class PenaltyDecision {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    private String soQuyetDinh;
     private String tenCoQuan;
-    private String soVanBan;
     private String thanhPho;
     private String nghiDinh;
+    private Date thoiGianLap;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "nguoi_vi_pham_id", referencedColumnName = "id")
-    private ViolationPerson nguoiViPham;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "nguoi_thi_hanh_id", referencedColumnName = "id")
-    private Executor nguoiThiHanh;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
+    @JsonIgnoreProperties({"roles", "password"})
+    private User nguoiThiHanh;
 
     private String xuPhatChinh;
     private Double mucPhat;
@@ -42,6 +46,10 @@ public class PenaltyDecision {
     private String diaChiKhoBac;
 
     private Boolean paid;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "violationId")
+    private ViolationRecord bienBanViPham;
 
     public PenaltyDecision(Double mucPhat, Boolean paid) {
         this.mucPhat = mucPhat;

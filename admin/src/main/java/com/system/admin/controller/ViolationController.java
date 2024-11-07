@@ -1,20 +1,26 @@
 package com.system.admin.controller;
 
-import com.system.admin.model.User;
-import com.system.admin.model.UserGroup;
+import com.system.admin.model.SeizedItem;
+import com.system.admin.model.ViolationRecord.ViolationPerson;
 import com.system.admin.model.ViolationRecord.ViolationRecord;
-import com.system.admin.payload.request.UserGroupRequest;
 import com.system.admin.service.ViolationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.repository.query.Param;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("${API_URL}")
 public class ViolationController {
@@ -26,6 +32,35 @@ public class ViolationController {
         List<ViolationRecord> list = violationService.getAll();
         return ResponseEntity.ok(list);
     }
+    @GetMapping("/violation-records/pageable")
+    public Page<ViolationRecord> getItems(
+            @RequestParam(defaultValue = "0") int page,    // Trang bắt đầu từ 0
+            @RequestParam(defaultValue = "5") int size    // Mặc định 5 bản ghi mỗi trang
+    ) {
+        return violationService.getItems(page, size);
+    }
+    @GetMapping("/violation-records/search")
+    public Page<ViolationRecord> searchViolations(
+            @RequestParam(required = false) String maBienBan,
+            @RequestParam(required = false) String soVanBan,
+            @RequestParam(required = false) String tenCoQuan,
+            @RequestParam(required = false) String nguoiViPham,
+            @RequestParam(required = false) String nguoiLap,
+            @RequestParam(required = false) String nguoiThietHai,
+            @RequestParam(required = false) String nguoiChungKien,
+            @RequestParam(required = false) Boolean resolved,
+            @RequestParam(required = false) String linhVuc,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        return violationService.searchViolations(
+                maBienBan, soVanBan, tenCoQuan, nguoiViPham, nguoiLap,
+                nguoiThietHai, nguoiChungKien, resolved, linhVuc,
+                startDate, endDate, PageRequest.of(page, size));
+    }
+
     @PostMapping("/violation-records")
     public ResponseEntity<ViolationRecord> createNewRecord(@RequestBody ViolationRecord violationRecord){
         try{
@@ -71,10 +106,49 @@ public class ViolationController {
         // Cập nhật trạng thái đã thanh toán
         violationService.updateViolationResolvedStatus(id, resolved);
         // Xác định trạng thái trả về
-        String status = resolved ? "resolved" : "unresolved";
-        String message = "Biên bản với id " + id + " đã " + status;
+        String status = resolved ? "đã giải quyết" : "chưa giải quyết";
+        String message = "Biên bản với id " + id + " " + status;
 
         // Trả về phản hồi với mã trạng thái 200 OK
-        return ResponseEntity.ok(status);
+        return ResponseEntity.ok(message);
     }
+    @GetMapping("/violation-records/{id}/violation-person")
+    public ResponseEntity<ViolationPerson> getPersonByViolationId(@PathVariable Long id) {
+        ViolationPerson nguoiViPham = violationService.getPersonByViolationId(id);
+        return ResponseEntity.ok(nguoiViPham);
+    }
+
+    @GetMapping("/violation-records/{id}/seized-items")
+    public ResponseEntity<List<SeizedItem>> getSeizedItemsByViolationId(@PathVariable Long id){
+        List<SeizedItem> seizedItems = violationService.getSeizedItemByViolationId(id);
+        return ResponseEntity.ok(seizedItems);
+    }
+
+//    @GetMapping("/violations/generate-templates")
+//    public ResponseEntity<byte[]> generateReport() throws Exception {
+//        try {
+//            // Chuẩn bị dữ liệu mẫu (replace with actual data fetching logic)
+//            ViolationRecord reportData = new ViolationRecord(); // Fetch or populate data as needed
+//
+//            // Call the service to generate the report
+//            byte[] report = violationService.generateTemplate(reportData);
+//
+//            // Create HTTP headers to return the PDF file
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.setContentType(MediaType.APPLICATION_PDF);
+//            headers.setContentDispositionFormData("attachment", "violation_report.pdf");
+//
+//            // Return the PDF file in the response
+//            return ResponseEntity.ok()
+//                    .headers(headers)
+//                    .body(report);
+//        } catch (Exception e) {
+//            // Log the error and return an internal server error response
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(null);
+//        }
+//    }
+
 }
+

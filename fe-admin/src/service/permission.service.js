@@ -15,7 +15,9 @@ class RoleService {
     });
   }
   deletePermission(id) {
-    return axios.delete(API_URL + `permissions/${id}`, { headers: authHeader() });
+    return axios.delete(API_URL + `permissions/${id}`, {
+      headers: authHeader(),
+    });
   }
   addPermission(permissionData) {
     return axios
@@ -27,15 +29,16 @@ class RoleService {
         console.log("Có lỗi khi thêm phân quyền", error);
       });
   }
-  editPermission(id, roleData) {
-    return axios
-      .put(API_URL + `permissions/${id}`, roleData, { headers: authHeader() })
-      .then((response) => {
-        return response.data;
-      })
-      .catch((error) => {
-        console.log("Có lỗi khi chỉnh sửa phân quyền", error);
-      });
+  editPermission(id, permissionData) {
+    return axios.put(API_URL + `permissions/${id}`, permissionData, {
+      headers: authHeader(),
+    });
+    // .then((response) => {
+    //   return response.data;
+    // })
+    // .catch((error) => {
+    //   console.log("Có lỗi khi chỉnh sửa phân quyền", error);
+    // });
   }
 
   getPermission(id) {

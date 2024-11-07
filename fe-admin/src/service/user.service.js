@@ -23,9 +23,28 @@ class UserService {
         throw error;
       });
   }
+  async uploadUserPhoto(userId, formData) {
+    return await axios.post(API_URL + `users/${userId}/photo`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        ...authHeader(), // Spread the headers returned by authHeader()
+      },
+    });
+  }
+
   editUser(id, userData) {
     return axios
       .put(API_URL + `users/${id}`, userData, { headers: authHeader() })
+      .then((response) => {
+        return response.data;
+      })
+      .catch((error) => {
+        console.error("Có lỗi khi cập nhật người dùng!", error);
+      });
+  }
+  editProfile(id, userData) {
+    return axios
+      .put(API_URL + `profile/${id}`, userData, { headers: authHeader() })
       .then((response) => {
         return response.data;
       })

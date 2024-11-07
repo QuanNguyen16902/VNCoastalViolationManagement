@@ -14,7 +14,7 @@
     box-sizing: border-box ;
 }
 body{
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Arial', sans-serif;
     color: #444444;
     background-color: var(--bgcolor);
 }
@@ -35,7 +35,7 @@ h3,
 h4,
 h5,
 h6{
-    font-family: 'Nunito', sans-serif;
+    font-family: 'Arial', sans-serif;
 }
 
 .dropdown-menu {

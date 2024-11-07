@@ -1,5 +1,7 @@
 package com.system.admin.controller;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.system.admin.LogUtils;
 import com.system.admin.exception.EmailAlreadyExistsException;
 import com.system.admin.exception.RoleNotFoundException;
@@ -8,7 +10,6 @@ import com.system.admin.exception.UsernameAlreadyExistsException;
 import com.system.admin.model.SystemLog;
 import com.system.admin.model.User;
 import com.system.admin.payload.request.AssignRoleRequest;
-import com.system.admin.payload.response.PaginatedResponse;
 import com.system.admin.security.auth_service.UserDetailsImpl;
 import com.system.admin.service.SystemLogService;
 import com.system.admin.service.UserService;
@@ -22,7 +23,9 @@ import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,25 +41,15 @@ public class UserController {
     @Autowired
     private LogUtils logUtils;
     @Autowired
+    private Cloudinary cloudinary;
+    @Autowired
     public UserController(UserService userService, SystemLogService logService) {
         this.userService = userService;
         this.logService = logService;
     }
 
 
-//    @GetMapping("/users")
-//    public ResponseEntity<PaginatedResponse<User>> getAllUser(Pageable pageable) {
-//        Page<User> userPage = userService.getAllUsers(pageable);
-//        PaginatedResponse<User> response = new PaginatedResponse<>(
-//                userPage.getNumber() + 1,
-//                pageable.getPageSize(),
-//                userPage.getTotalElements(),
-//                userPage.getContent()
-//        );
-//        return ResponseEntity.ok().body(response);
-//    }
-//
-//
+
 //    @GetMapping("/users/search")
 //    public ResponseEntity<PaginatedResponse<User>> searchUsers(@RequestParam("keyword") String keyword, Pageable pageable) {
 //        Page<User> userPage = userService.searchUsers(keyword, pageable);
@@ -92,15 +85,12 @@ public class UserController {
         if (result.hasErrors()) {
             HashMap<String, String> errors = new HashMap<>();
             result.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-            // Ghi nhật ký lỗi
-            logUtils.logAction("CREATE", "Lỗi thêm người dùng", user.getUsername() + ": " + errors.toString());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
         }
+
         try {
-            userService.save(user);
-            // Ghi nhật ký thành công
-            logUtils.logAction("CREATE", "Thêm người dùng mới", user.getUsername());
-            return ResponseEntity.status(HttpStatus.CREATED).body("Thêm người dùng thành công");
+            User createdUser = userService.save(user); // Save user without photo
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
         } catch (EmailAlreadyExistsException | UsernameAlreadyExistsException | RoleNotFoundException |
                  AuthorizationServiceException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
@@ -108,17 +98,47 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
+    @PreAuthorize("hasAuthority('CREATE_USER')")
+    @PostMapping("/users/{userId}/photo")
+    public ResponseEntity<?> uploadUserPhoto(@PathVariable Long userId,
+                                             @RequestPart("photo") MultipartFile photo) {
+        try {
+            if (photo.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Photo file is missing.");
+            }
+            // Upload photo and get the URL
+            String photoUrl = uploadPhoto(photo);
+
+            // Update user's photo without revalidating email/username
+            userService.updateUserPhoto(userId, photoUrl);
+            return ResponseEntity.ok("Upload ảnh thành công");
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    // Hàm để upload ảnh
+    private String uploadPhoto(MultipartFile photo) throws IOException {
+        Map<String, Object> uploadResult = cloudinary.uploader().upload(photo.getBytes(),
+                ObjectUtils.asMap("resource_type", "auto"));
+        return (String) uploadResult.get("url");
+    }
 
     @PreAuthorize("hasAuthority('EDIT_USER')")
     @PutMapping("/users/{id}")
-    public ResponseEntity<String> updateUser(@PathVariable("id") Long id, @RequestBody User user) {
+    public ResponseEntity<User> updateUser(@PathVariable("id") Long id, @RequestBody User user
+                                             ) {
         try {
-            userService.updateUser(id, user);
+            User updatedUser = userService.updateUser(id, user);
             // Ghi nhật ký
             logUtils.logAction("UPDATE", "Cập nhật người dùng với ID: " + id + ", ", user.getUsername());
-            return ResponseEntity.ok("Cập nhật người dùng thành công");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.ok(updatedUser);
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 

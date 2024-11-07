@@ -1,0 +1,25 @@
+.chevron-icon {
+    transition: transform 0.3s ease; /* Tạo hiệu ứng xoay mượt */
+  }
+  
+  .rotate-down {
+    transform: rotate(90deg); /* Xoay mũi tên phải (chevron-right) xuống thành (chevron-down) */
+  }
+  
+  .child-nav-item {
+    background-color: transparent;
+    transition: background-color 0.3s ease;
+  }
+  
+  .child-nav-item.active {
+    color: #4154f1;
+    background: #f6f9ff;
+  }
+
+
+.child-nav-item.active span{
+    color: #4154f1;
+}
+ .child-nav-item.active i{
+    color: #4154f1;
+}

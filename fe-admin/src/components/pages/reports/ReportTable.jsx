@@ -196,7 +196,7 @@ const ReportTable = () => {
             7 Ngày Gần Nhất
           </Button>
           <Button
-            variant={period === "last_wweek" ? "contained" : "outlined"}
+            variant={period === "last_30_days" ? "contained" : "outlined"}
             color="primary"
             className="me-2"
             onClick={() => handlePeriodChange("last_30_days")}

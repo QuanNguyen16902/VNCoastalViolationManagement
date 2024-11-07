@@ -1,6 +1,8 @@
 import {
+  Box,
   Button,
   Checkbox,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -172,16 +174,18 @@ function EditRoleDialog({ open, onClose, onEditRole, roleId }) {
                     onChange={(event) =>
                       setFieldValue("permissions", event.target.value)
                     }
-                    renderValue={(selected) =>
-                      selected
-                        .map(
-                          (id) =>
-                            permissions.find(
-                              (permission) => permission.id === id
-                            )?.name
-                        )
-                        .join(", ")
-                    }
+                    renderValue={(selected) => (
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                        {selected.map((id) => {
+                          const permission = permissions.find(
+                            (permission) => permission.id === id
+                          );
+                          return permission ? (
+                            <Chip key={id} label={permission.name} />
+                          ) : null;
+                        })}
+                      </Box>
+                    )}
                     MenuProps={{
                       PaperProps: {
                         style: { maxHeight: 200 },

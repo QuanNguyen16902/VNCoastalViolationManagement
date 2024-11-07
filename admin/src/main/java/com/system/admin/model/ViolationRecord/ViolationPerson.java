@@ -1,9 +1,13 @@
 package com.system.admin.model.ViolationRecord;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -21,6 +25,11 @@ public class ViolationPerson {
     private String canCuoc;
     private String noiCap;
     private String ngayCap;
-    private String hanhVi;
     private String quocTich;
+    private String email;
+    private Integer soLanViPham;
+
+    @OneToMany(mappedBy = "nguoiViPham", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<ViolationRecord> violationRecords = new ArrayList<>();
 }

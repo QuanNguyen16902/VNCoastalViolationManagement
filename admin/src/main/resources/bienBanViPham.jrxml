@@ -1,0 +1,221 @@
+<jasperReport name="item-report" language="java" pageWidth="612" pageHeight="792" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="f1c0ca0d-201a-4c44-9ed5-dbf7b104bffb" ignorePagination="true">
+    <parameter name="tenNguoiViPham" class="java.lang.String"/>
+    <parameter name="namSinh" class="java.lang.Integer"/>
+    <parameter name="ngheNghiep" class="java.lang.String"/>
+    <parameter name="diaChi" class="java.lang.String"/>
+    <parameter name="quocTich" class="java.lang.String"/>
+    <parameter name="CMND" class="java.lang.String"/>
+    <parameter name="ngayCap" class="java.lang.String"/>
+    <parameter name="noiCap" class="java.lang.String"/>
+    <parameter name="hanhVi" class="java.lang.String"/>
+    <parameter name="viPhamDieuKhoan" class="java.lang.String"/>
+    <parameter name="nguoiThietHai" class="java.lang.String"/>
+    <parameter name="yKienNguoiViPham" class="java.lang.String"/>
+    <parameter name="yKienNguoiChungKien" class="java.lang.String"/>
+    <parameter name="yKienNguoiThietHai" class="java.lang.String"/>
+    <parameter name="bienPhapNganChan" class="java.lang.String"/>
+    <parameter name="tamGiu" class="java.lang.String"/>
+    <parameter name="thoiGianViPham" class="java.util.Date"/>
+    <parameter name="diaDiem" class="java.lang.String"/>
+    <parameter name="tongDungTich" class="java.lang.String"/>
+    <parameter name="soHieuTau" class="java.lang.String"/>
+    <parameter name="congSuat" class="java.lang.String"/>
+    <parameter name="haiTrinhCapPhep" class="java.lang.String"/>
+    <parameter name="toaDoX" class="java.lang.Long"/>
+    <parameter name="toaDoY" class="java.lang.Long"/>
+    <parameter name="haiTrinhThucTe" class="java.lang.String"/>
+    <parameter name="soBan" class="java.lang.Integer"/>
+    <parameter name="yeuCau" class="java.lang.String"/>
+    <parameter name="thoiGianGiaiQuyet" class="java.util.Date"/>
+    <field name="soVanBan" class="java.lang.String"/>
+    <field name="thoiGianLap" class="java.util.Date"/>
+    <field name="nguoiLap" class="java.lang.String"/>
+    <field name="nguoiChungKien" class="java.lang.String"/>
+    <field name="tenCoQuan" class="java.lang.String"/>
+    <field name="linhVuc" class="java.lang.String"/>
+    <variable name="thoiGianLap" class="java.sql.Time"/>
+    <title height="150" splitType="Stretch">
+        <element kind="staticText" uuid="6d584a82-0556-481f-8c4c-d396c526cdd6" x="300" y="20" width="250" height="20" fontName="DejaVu Serif" fontSize="12.0" bold="true" hTextAlign="Center" vTextAlign="Top">
+            <text><![CDATA[Độc lập - Tự do - Hạnh phúc]]></text>
+        </element>
+        <element kind="staticText" uuid="2266ff1d-efcc-488e-93cc-1f7130dc32dd" x="270" y="0" width="310" height="20" fontName="DejaVu Serif" fontSize="12.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+            <text><![CDATA[CỘNG HOÀ XÃ HỘI CHỦ NGHĨA VIỆT NAM]]></text>
+        </element>
+        <element kind="textField" uuid="dab9088f-e568-4ea3-9203-5c2465a2a590" x="330" y="60" width="320" height="19" fontName="DejaVu Serif" fontSize="11.0" italic="true">
+            <expression><![CDATA[$P{diaDiem} + ", Ngày " + new java.text.SimpleDateFormat("dd 'tháng' MM 'năm' yyyy").format($F{thoiGianLap})]]></expression>
+        </element>
+        <element kind="textField" uuid="fe38aace-b8d8-4a9c-bd72-c4c361d7de46" x="40" y="20" width="150" height="20" fontName="DejaVu Serif" fontSize="12.0" bold="true" hTextAlign="Center" vTextAlign="Top">
+            <expression><![CDATA[$F{tenCoQuan}]]></expression>
+        </element>
+        <element kind="line" uuid="90264fff-4655-4ee0-8ebe-bde535c01428" x="50" y="49" width="130" height="1"/>
+        <element kind="line" uuid="a2b6b918-f925-434f-9582-d55f6bee5fcf" x="340" y="49" width="190" height="1"/>
+        <element kind="textField" uuid="c8939342-7b14-42f6-9c51-b330df54b9cb" x="50" y="60" width="140" height="19" fontName="DejaVu Serif" fontSize="11.0" italic="true" hTextAlign="Center">
+            <expression><![CDATA["Số: " + $F{soVanBan}+ "/BB-VPHC"]]></expression>
+        </element>
+        <element kind="staticText" uuid="a94cbe58-aa1b-486c-bb2b-d1c102e2b87e" x="30" y="0" width="180" height="20" fontName="DejaVu Serif" fontSize="12.0" hTextAlign="Center" vTextAlign="Middle">
+            <text><![CDATA[TÊN CƠ QUAN CHỦ QUẢN]]></text>
+        </element>
+        <element kind="staticText" uuid="856de6eb-f3ac-4280-bd0c-c3612b1c5919" x="90" y="100" width="389" height="30" fontName="DejaVu Serif" fontSize="14.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+            <text><![CDATA[BIÊN BẢN VI PHẠM HÀNH CHÍNH]]></text>
+        </element>
+        <element kind="textField" uuid="ec83aecd-4e1b-43f1-b502-c793f7468494" x="120" y="120" width="330" height="30" fontName="DejaVu Serif" fontSize="14.0" bold="true" hTextAlign="Left" vTextAlign="Middle">
+            <expression><![CDATA["Về " + $F{linhVuc}]]></expression>
+        </element>
+    </title>
+    <detail>
+        <band height="697" splitType="Stretch">
+            <element kind="line" uuid="c8356a55-52ec-4d59-b435-951af32e5bba" x="180" y="10" width="180" height="1"/>
+            <element kind="staticText" uuid="6d82a46d-367a-4be6-a1f7-44c3e7488f64" x="40" y="50" width="90" height="20" fontName="DejaVu Serif" bold="true">
+                <text><![CDATA[Chúng tôi gồm:]]></text>
+            </element>
+            <element kind="staticText" uuid="0300fbc6-626d-4149-b9b4-6799cb175d20" x="40" y="70" width="160" height="20" fontName="DejaVu Serif" bold="true">
+                <text><![CDATA[Với sự chứng kiến của:]]></text>
+            </element>
+            <element kind="staticText" uuid="c02362e7-4031-483a-97f4-e36b977cb3fa" x="40" y="90" width="300" height="20" fontName="DejaVu Serif" bold="true">
+                <text><![CDATA[Tiến hành lập biên bản vi phạm hành chính đối với: ]]></text>
+            </element>
+            <element kind="textField" uuid="43ff92d3-e5e8-4abd-9a18-6bb2ad25f741" x="130" y="50" width="100" height="20" fontName="DejaVu Serif">
+                <expression><![CDATA[$F{nguoiLap}]]></expression>
+            </element>
+            <element kind="textField" uuid="8a25759b-2bd6-4efd-a57b-8792abd15db2" x="170" y="70" width="140" height="20" fontName="DejaVu Serif">
+                <expression><![CDATA[$F{nguoiChungKien}]]></expression>
+            </element>
+            <element kind="textField" uuid="1e6e358d-012e-49a8-accf-30c6a04c5cde" x="50" y="20" width="520" height="40" fontName="DejaVu Serif">
+                <expression><![CDATA["Hôm nay, hồi " + new java.text.SimpleDateFormat("HH:mm 'ngày' dd 'tháng' MM 'năm' yyyy").format($F{thoiGianLap}) + ", tại vùng biển thuộc địa phận tỉnh " + $P{diaDiem}]]></expression>
+            </element>
+            <element kind="staticText" uuid="30a6ef27-9f60-4fa2-a0b5-d653feda7e07" x="60" y="110" width="110" height="20" fontName="DejaVu Serif">
+                <text><![CDATA[Ông (Bà)/tổ chức:]]></text>
+            </element>
+            <element kind="textField" uuid="3787ed28-302e-4cb4-9463-c34f6cff6240" x="160" y="110" width="150" height="20" fontName="DejaVu Serif" bold="true">
+                <expression><![CDATA[$P{tenNguoiViPham}]]></expression>
+            </element>
+            <element kind="staticText" uuid="4d989ace-cf3d-417e-8970-166b9d1c9fcc" x="314" y="110" width="70" height="20" fontName="DejaVu Serif">
+                <text><![CDATA[Năm sinh:]]></text>
+            </element>
+            <element kind="textField" uuid="c610000e-8ac5-4652-a23b-d9a18fb6fbd3" x="380" y="110" width="151" height="20" fontName="DejaVu Serif" bold="true">
+                <expression><![CDATA[$P{namSinh}]]></expression>
+            </element>
+            <element kind="textField" uuid="0f3d859d-1928-4ee0-b878-8920bc56044d" x="60" y="127" width="310" height="20" fontName="DejaVu Serif">
+                <expression><![CDATA["Nghề nghiệp/lĩnh vực hoạt động: " + $P{ngheNghiep}]]></expression>
+            </element>
+            <element kind="textField" uuid="da163cd5-b72b-4e26-899f-a4cfc76e3b68" x="60" y="146" width="260" height="20" fontName="DejaVu Serif">
+                <expression><![CDATA["Địa chỉ: " + $P{diaChi}]]></expression>
+            </element>
+            <element kind="textField" uuid="bfabfbc7-75bb-478d-8354-6603785eaf39" x="60" y="165" width="471" height="20" fontName="DejaVu Serif">
+                <expression><![CDATA["Giấy CMND/Quyết định thành lập hoặc đăng ký kinh doanh số: " + $P{CMND}]]></expression>
+            </element>
+            <element kind="textField" uuid="37d290b0-6fd5-424c-a11c-83c98173df97" x="60" y="184" width="220" height="20" fontName="DejaVu Serif">
+                <expression><![CDATA["Cấp ngày: " + $P{ngayCap}]]></expression>
+            </element>
+            <element kind="textField" uuid="aeb21929-ede8-4e95-9c75-888f77f2f8e6" x="260" y="185" width="220" height="20" fontName="DejaVu Serif">
+                <expression><![CDATA["Nơi cấp: " + $P{noiCap}]]></expression>
+            </element>
+            <element kind="textField" uuid="e776f931-807f-469c-8a7a-c9872753c505" x="57" y="290" width="471" height="40" fontName="DejaVu Serif">
+                <expression><![CDATA["Các hành vi trên đã vi phạm vào " + $P{viPhamDieuKhoan}]]></expression>
+            </element>
+            <element kind="staticText" uuid="ff4df735-d80b-4fe0-ba04-f98b5ea1e3f4" x="60" y="203" width="270" height="20" fontName="DejaVu Serif">
+                <text><![CDATA[Đã có các hành vi vi phạm hành chính như sau:]]></text>
+            </element>
+            <element kind="textField" uuid="7ec00a3c-37f4-4269-a6a5-8e2546f0bb47" x="60" y="220" width="471" height="100" fontName="DejaVu Serif">
+                <paragraph lineSpacing="1_1_2"/>
+                <expression><![CDATA["Vào lúc " + new java.text.SimpleDateFormat("HH:mm 'ngày' dd 'tháng' MM 'năm' yyyy").format($P{thoiGianViPham})  + ", tại vùng biển thuộc địa phận tỉnh " + $P{diaDiem} + ", tàu mang số hiệu: " + $P{soHieuTau} + " , có tổng dung tích: "  + $P{tongDungTich} + ", công suất: " + $P{congSuat} + " kW, hành trình cấp phép: " + $P{haiTrinhCapPhep} + ", tọa độ: (" + $P{toaDoX} + ", " + $P{toaDoY} + "), hành trình thực tế: " + $P{haiTrinhThucTe} + ", có hành vi vi phạm: " + $P{hanhVi}]]></expression>
+                <property name="com.jaspersoft.studio.unit.spacingBefore" value="pixel"/>
+                <property name="com.jaspersoft.studio.unit.spacingAfter" value="pixel"/>
+            </element>
+            <element kind="staticText" uuid="bb2c8b7e-4b45-4a24-ab4b-b551ee8083a5" x="40" y="330" width="190" height="16" fontName="DejaVu Serif" bold="true">
+                <text><![CDATA[Người/Tổ chức bị thiệt hại:]]></text>
+            </element>
+            <element kind="textField" uuid="063e6593-727c-4cab-963f-e6c450c9c5d9" x="200" y="330" width="100" height="16" fontName="DejaVu Serif">
+                <expression><![CDATA[$P{nguoiThietHai}]]></expression>
+            </element>
+            <element kind="staticText" uuid="d78d6d20-6be9-45ec-8002-4e39fee12353" x="55" y="346" width="310" height="20" fontName="DejaVu Serif">
+                <text><![CDATA[Ý kiến trình bày của người/đại diện tổ chức vi phạm:]]></text>
+            </element>
+            <element kind="textField" uuid="a4e91e39-3d57-4bbe-8106-5ddd6b68e897" x="68" y="364" width="471" height="31" fontName="DejaVu Serif">
+                <expression><![CDATA[$P{yKienNguoiViPham}]]></expression>
+            </element>
+            <element kind="staticText" uuid="9a360829-5032-416e-9407-e32ecb34ecc7" x="55" y="393" width="310" height="20" fontName="DejaVu Serif">
+                <text><![CDATA[Ý kiến trình bày của người chứng kiến: ]]></text>
+            </element>
+            <element kind="textField" uuid="afaf5686-c0cf-4451-bc03-738f979657f5" x="68" y="411" width="471" height="31" fontName="DejaVu Serif">
+                <expression><![CDATA[$P{yKienNguoiChungKien}]]></expression>
+            </element>
+            <element kind="staticText" uuid="b58c84f0-caa9-43e5-821f-f53ab23f388c" x="55" y="440" width="310" height="20" fontName="DejaVu Serif">
+                <text><![CDATA[Ý kiến trình bày của người/tổ chức bị thiệt hại:]]></text>
+            </element>
+            <element kind="textField" uuid="1d83292a-47c2-49b4-9221-b156c5e1868d" x="68" y="456" width="471" height="31" fontName="DejaVu Serif">
+                <expression><![CDATA[$P{yKienNguoiThietHai}]]></expression>
+            </element>
+            <element kind="staticText" uuid="ee30f5e7-e6bd-41af-989d-6b66afcd5bfc" x="55" y="476" width="419" height="30" fontName="DejaVu Serif">
+                <text><![CDATA[Chúng tôi đã yêu cầu Ông (Bà)/tổ chức vi phạm đình chỉ ngay hành vi vi phạm.
+Các biện pháp ngăn chặn vi phạm hành chính được áp dụng gồm:
+]]></text>
+            </element>
+            <element kind="textField" uuid="069aafda-1158-420b-be1e-d1815dc81f71" x="68" y="506" width="471" height="31" fontName="DejaVu Serif">
+                <expression><![CDATA[$P{bienPhapNganChan}]]></expression>
+            </element>
+            <element kind="staticText" uuid="599ddbf8-1bd5-4539-aa24-ce74ce94875e" x="55" y="526" width="471" height="20" fontName="DejaVu Serif">
+                <text><![CDATA[Tang vật, phương tiện, giấy tờ bị tạm giữ gồm: (10) (Nếu nhiều thì lập bản thống kê riêng) ]]></text>
+            </element>
+            <element kind="textField" uuid="b8e6e03d-bc9c-4256-a1ca-3b26302ccb1a" x="68" y="546" width="420" height="20" fontName="DejaVu Serif">
+                <expression><![CDATA[$P{tamGiu}]]></expression>
+            </element>
+            <element kind="staticText" uuid="6544e216-1932-4df5-8cc0-c02ff7b0141b" x="55" y="566" width="470" height="30" fontName="DejaVu Serif">
+                <text><![CDATA[Ngoài những tang vật, phương tiện vi phạm hành chính và các giấy tờ nêu trên, chúng tôi không tạm giữ thêm thứ gì khác.]]></text>
+            </element>
+            <element kind="textField" uuid="0f7bf979-c81a-4523-8865-4ab1c8904524" x="55" y="596" width="470" height="56" fontName="DejaVu Serif">
+                <expression><![CDATA["Yêu cầu Ông/Bà hoặc đại diện tổ chức vi phạm có mặt tại " + $P{yeuCau} + " vào lúc " + new java.text.SimpleDateFormat("HH 'giờ' mm 'phút', 'ngày' dd 'tháng' MM 'năm' yyyy").format($P{thoiGianGiaiQuyet}) + " để giải quyết."]]></expression>
+            </element>
+            <element kind="textField" uuid="742e3f45-eef6-4235-b471-a4ba2d21fd59" x="55" y="630" width="470" height="65" markup="html" fontName="DejaVu Serif" hTextAlign="Justified">
+                <paragraph lineSpacingSize="1.0" spacingBefore="6" spacingAfter="6"/>
+                <expression><![CDATA["Biên bản lập xong hồi " + new java.text.SimpleDateFormat("HH 'giờ' mm, 'ngày' dd 'tháng' MM 'năm' yyyy").format($F{thoiGianLap}) + ", gồm 1 trang, được lập thành <b>" + $P{soBan} +"</b> bản có nội dung, giá trị như nhau; đã đọc lại cho những người có tên trên cùng nghe, công nhận là đúng và cùng ký tên dưới đây; đã giao cho người vi phạm/đại diện tổ chức vi phạm một bản./."]]></expression>
+                <property name="com.jaspersoft.studio.unit.spacingBefore" value="px"/>
+                <property name="com.jaspersoft.studio.unit.spacingAfter" value="px"/>
+            </element>
+            <element kind="textField" uuid="9c4b3810-f860-42dc-8b7b-a1f689967675" x="310" y="147" width="217" height="18" fontName="DejaVu Serif">
+                <expression><![CDATA["Quốc tịch: " + $P{quocTich}]]></expression>
+            </element>
+            <property name="com.jaspersoft.studio.unit.height" value="px"/>
+        </band>
+    </detail>
+    <summary height="173">
+        <element kind="staticText" uuid="bf3e34be-1c71-433e-a276-405cb15192c5" x="42" y="133" width="500" height="40" fontName="DejaVu Serif" hTextAlign="Left">
+            <text><![CDATA[Lý do không ký biên bản:
+............................................................................................................................................................................................................................................................................................................
+
+]]></text>
+        </element>
+        <element kind="staticText" uuid="84f77617-b520-4979-89ed-91d6f6c0acb7" x="95" y="80" width="155" height="30" fontName="DejaVu Serif" bold="true" hTextAlign="Center">
+            <text><![CDATA[ĐẠI DIỆN CHÍNH QUYỀN]]></text>
+        </element>
+        <element kind="staticText" uuid="5dbd4e41-7316-447e-af33-506dab3e0143" x="120" y="93" width="100" height="22" fontName="DejaVu Serif" italic="true" hTextAlign="Center">
+            <text><![CDATA[(Ký, ghi rõ họ tên)]]></text>
+        </element>
+        <element kind="staticText" uuid="cabe832c-9c85-4940-ade1-b79ce219549d" x="300" y="80" width="130" height="30" fontName="DejaVu Serif" bold="true" hTextAlign="Center">
+            <text><![CDATA[NGƯỜI BỊ THIỆT HẠI]]></text>
+        </element>
+        <element kind="staticText" uuid="2cbb55bd-0286-4228-8e05-c5e1d561d113" x="310" y="93" width="100" height="22" fontName="DejaVu Serif" italic="true" hTextAlign="Center">
+            <text><![CDATA[(Ký, ghi rõ họ tên)]]></text>
+        </element>
+        <element kind="staticText" uuid="200619c3-d173-4fc3-a0b1-346c4040fb72" x="49" y="11" width="144" height="30" fontName="DejaVu Serif" bold="true" hTextAlign="Center">
+            <text><![CDATA[NGƯỜI HOẶC ĐẠI DIỆN TỔ CHỨC VI PHẠM
+
+]]></text>
+        </element>
+        <element kind="staticText" uuid="e23c021e-7407-4e72-bf21-53b04f6585c5" x="219" y="11" width="130" height="30" fontName="DejaVu Serif" bold="true" hTextAlign="Center">
+            <text><![CDATA[NGƯỜI CHỨNG KIẾN]]></text>
+        </element>
+        <element kind="staticText" uuid="2257b968-a10f-4d8c-96b3-32448ffde997" x="375" y="10" width="130" height="30" fontName="DejaVu Serif" bold="true" hTextAlign="Center">
+            <text><![CDATA[NGƯỜI LẬP BIÊN BẢN]]></text>
+        </element>
+        <element kind="staticText" uuid="52bf2668-b07c-457b-a186-3c65a32e8796" x="68" y="32" width="100" height="22" fontName="DejaVu Serif" italic="true" hTextAlign="Center">
+            <text><![CDATA[(Ký, ghi rõ họ tên)]]></text>
+        </element>
+        <element kind="staticText" uuid="fedf4ec9-cd44-425e-9d68-26dbaf04f381" x="232" y="21" width="100" height="22" fontName="DejaVu Serif" italic="true" hTextAlign="Center">
+            <text><![CDATA[(Ký, ghi rõ họ tên)]]></text>
+        </element>
+        <element kind="staticText" uuid="f2207044-9857-49de-8d37-9d5a12f79f07" x="365" y="20" width="151" height="22" fontName="DejaVu Serif" italic="true" hTextAlign="Center">
+            <text><![CDATA[(Ký, ghi rõ cấp bậc, họ tên)]]></text>
+        </element>
+    </summary>
+</jasperReport>

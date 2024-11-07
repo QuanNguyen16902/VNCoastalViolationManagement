@@ -28,6 +28,18 @@ class DecisionService {
       headers: authHeader(),
     });
   }
+  searchDecision(queryParams) {
+    return axios.get(API_URL + "penalty-decision/search", {
+      params: queryParams,
+      headers: authHeader(),
+    });
+  }
+  exportDecision(id) {
+    return axios.get(API_URL + `export/decisions/pdf/${id}`, {
+      headers: authHeader(),
+      responseType: "blob",
+    });
+  }
 }
 
 export default new DecisionService();

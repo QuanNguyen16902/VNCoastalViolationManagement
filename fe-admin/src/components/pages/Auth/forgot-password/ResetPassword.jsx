@@ -33,24 +33,24 @@ function ResetPasswordPage() {
   const handleSubmit = async (values) => {
     setIsLoading(true);
     try {
-        const response = await authService.resetPassword({
-            token: resetToken,
-            newPassword: values.password,
-            verificationCode: values.verificationCode,
-        });
+      const response = await authService.resetPassword({
+        token: resetToken,
+        newPassword: values.password,
+        verificationCode: values.verificationCode,
+      });
 
-        if (response.success) {
-            toast.success(response.message);
-        } else {
-            toast.error(response.message);
-        }
+      if (response.success) {
+        toast.success(response.message);
+      } else {
+        toast.error(response.message);
+      }
     } catch (error) {
-        console.error('Lỗi khi gửi yêu cầu:', error); // Log lỗi để dễ debug hơn
-        toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
+      console.error("Lỗi khi gửi yêu cầu:", error); // Log lỗi để dễ debug hơn
+      toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
-};
+  };
 
   return (
     <div className="login-container d-flex align-items-center justify-content-center">
@@ -62,7 +62,11 @@ function ResetPasswordPage() {
         <div className="login-form-container p-4">
           <h1>Đặt lại mật khẩu</h1>
           <Formik
-            initialValues={{ verificationCode: "", password: "", confirmPassword: "" }}
+            initialValues={{
+              verificationCode: "",
+              password: "",
+              confirmPassword: "",
+            }}
             validationSchema={resetPasswordValidationSchema}
             onSubmit={handleSubmit}
           >
@@ -105,19 +109,18 @@ function ResetPasswordPage() {
             </Form>
           </Formik>
 
-          {isLoading && (
-            <div className="loading-overlay">
-              <div className="spinner"></div>
-              <p>Đang xử lý...</p>
-            </div>
-          )}
-
           <div className="text-center mt-3">
             <p>
               <a href="/login">Quay lại đăng nhập</a>
             </p>
           </div>
         </div>
+        {isLoading && (
+          <div className="loading-overlay">
+            <div className="spinner"></div>
+            <p>Đang xử lý...</p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 package com.system.admin.controller;
 
 import com.system.admin.exception.TokenRefreshException;
+import com.system.admin.exception.UserNotFoundException;
 import com.system.admin.model.SettingUpdateRequest;
 import com.system.admin.model.SystemLog;
 import com.system.admin.model.token.PasswordResetToken;
@@ -18,6 +19,7 @@ import com.system.admin.security.auth_service.EmailService;
 import com.system.admin.security.auth_service.RefreshTokenService;
 import com.system.admin.security.auth_service.UserDetailsImpl;
 import com.system.admin.security.jwt.JwtUtils;
+import com.system.admin.service.CloudinaryService;
 import com.system.admin.service.SystemLogService;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
@@ -37,6 +39,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -70,6 +75,18 @@ public class AuthController {
     @Autowired
     private SystemLogService logService;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
+        try {
+            String imageUrl = cloudinaryService.uploadImage(file);
+            return ResponseEntity.ok(imageUrl);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Upload failed");
+        }
+    }
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         try {
@@ -105,7 +122,9 @@ public class AuthController {
             }
             // Ghi nhật ký khi người dùng đăng nhập
             SystemLog log = new SystemLog();
-            log.setUserId(((UserDetailsImpl) authentication.getPrincipal()).getId());
+            Long userId = ((UserDetailsImpl) authentication.getPrincipal()).getId();
+            User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Không tìm thấy user"));
+            log.setUser(user);
             log.setAction("Người dùng đã đăng nhập");
             log.setDetails("User " + ((UserDetailsImpl) authentication.getPrincipal()).getUsername() + " đã đăng nhập.");
             logService.save(log);
@@ -160,6 +179,9 @@ public class AuthController {
                 roles.add(foundRole);
             });
         }
+        if (user.getProfile() != null) {
+            user.getProfile().setUser(user);
+        }
         user.setRoles(roles);
         userRepository.save(user);
 
@@ -182,7 +204,8 @@ public class AuthController {
         refreshTokenService.deleteByUserId(userId);
         // Ghi nhật ký khi người dùng đăng nhập
         SystemLog log = new SystemLog();
-        log.setUserId(((UserDetailsImpl) authentication.getPrincipal()).getId());
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Không tìm thấy user"));
+        log.setUser(user);
         log.setAction("Người dùng đã đăng xuất");
         log.setDetails("User " + ((UserDetailsImpl) authentication.getPrincipal()).getUsername() + " đã đăng xuất.");
         logService.save(log);
@@ -235,6 +258,7 @@ public class AuthController {
         passwordResetToken.setToken(token);
         passwordResetToken.setEmail(email);
         passwordResetToken.setVerificationCode(verificationCode);
+        passwordResetToken.setUser(userOptional.get());
         // Token hết hạn sau 1 giờ
         passwordResetToken.setExpiryDate(new Date(System.currentTimeMillis() + 3600 * 1000));
 

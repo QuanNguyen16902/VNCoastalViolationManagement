@@ -5,9 +5,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   FormControl,
   FormControlLabel,
   FormGroup,
+  Grid,
   InputLabel,
   MenuItem,
   Select,
@@ -32,7 +34,7 @@ const validationSchema = Yup.object({
 
 function AddUserModal({ open, onClose, onAddUser }) {
   const [roles, setRoles] = useState([]);
-
+  const [imagePreview, setImagePreview] = useState(null);
   useEffect(() => {
     const fetchRoles = async () => {
       try {
@@ -51,6 +53,7 @@ function AddUserModal({ open, onClose, onAddUser }) {
         ...values,
         // rolesName: roles.filter(role => values.roles.includes(role.id)).map(role => role.name)
       };
+      console.log("data: " + userData);
       await userService.addUser(userData);
       toast.success("Người dùng đã được thêm thành công!");
       onAddUser();
@@ -76,7 +79,14 @@ function AddUserModal({ open, onClose, onAddUser }) {
             email: "",
             password: "",
             roles: [],
-            enabled: true,
+            enabled: false,
+            photo: null, // Thêm trường photo
+            profile: {
+              department: "",
+              fullName: "",
+              position: "",
+              rank: "",
+            },
           }}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
@@ -90,82 +100,128 @@ function AddUserModal({ open, onClose, onAddUser }) {
             touched,
           }) => (
             <Form id="add-user-form">
-              <Field
-                as={TextField}
-                name="username"
-                label="Username"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                required
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.username && Boolean(errors.username)}
-                helperText={touched.username && errors.username}
-              />
-              <Field
-                as={TextField}
-                name="email"
-                label="Email"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                required
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.email && Boolean(errors.email)}
-                helperText={touched.email && errors.email}
-                type="email"
-              />
-              <Field
-                as={TextField}
-                name="password"
-                label="Mật khẩu"
-                fullWidth
-                margin="normal"
-                variant="outlined"
-                required
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.password && Boolean(errors.password)}
-                helperText={touched.password && errors.password}
-                type="password"
-              />
-              <FormControl fullWidth margin="normal" variant="outlined">
-                <InputLabel>Tình trạng</InputLabel>
-                <Select
-                  name="enabled"
-                  value={values.enabled}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  label="Tình trạng"
-                >
-                  <MenuItem value={true}>Kích hoạt</MenuItem>
-                  <MenuItem value={false}>Không kích hoạt</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl component="fieldset" margin="normal">
-                {/* <FormLabel>Chọn quyền</FormLabel> */}
-                <FormGroup>
-                  {roles.map((role) => (
-                    <FormControlLabel
-                      key={role.id}
-                      control={
-                        <Checkbox
-                          checked={values.roles.includes(role.id)}
-                          onChange={(event) => {
-                            const updatedRoles = event.target.checked
-                              ? [...values.roles, role.id]
-                              : values.roles.filter((id) => id !== role.id);
-                            setFieldValue("roles", updatedRoles);
-                          }}
+              <Grid container spacing={2} sx={{ marginTop: 2 }}>
+                {/* Left Side Fields */}
+                <Grid item xs={12} md={6}>
+                  <Field
+                    as={TextField}
+                    name="profile.fullName"
+                    label="Full Name"
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    required
+                  />
+
+                  <Field
+                    as={TextField}
+                    name="profile.department"
+                    label="Đơn vị"
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    required
+                  />
+
+                  <Field
+                    as={TextField}
+                    name="profile.position"
+                    label="Chức vụ"
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    required
+                  />
+
+                  <Field
+                    as={TextField}
+                    name="profile.rank"
+                    label="Cấp bậc"
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    required
+                  />
+                </Grid>
+
+                {/* Divider */}
+                <Grid item xs={12} md={1}>
+                  <Divider orientation="vertical" flexItem />
+                </Grid>
+
+                {/* Right Side Fields */}
+                <Grid item xs={12} md={5}>
+                  <Field
+                    as={TextField}
+                    name="username"
+                    label="Username"
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    required
+                  />
+
+                  <Field
+                    as={TextField}
+                    name="email"
+                    label="Email"
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    required
+                    type="email"
+                  />
+
+                  <Field
+                    as={TextField}
+                    name="password"
+                    label="Mật khẩu"
+                    // value={values.password}
+                    fullWidth
+                    margin="normal"
+                    variant="outlined"
+                    required
+                    type="password"
+                  />
+
+                  <FormControl fullWidth margin="normal" variant="outlined">
+                    <InputLabel>Tình trạng</InputLabel>
+                    <Select
+                      name="enabled"
+                      label="Tình trạng"
+                      value={values.enabled} // Set value from Formik's state
+                      onChange={handleChange} // Use Formik's handleChange to update state
+                      onBlur={handleBlur} // Optional: Use handleBlur for validation
+                    >
+                      <MenuItem value={true}>Kích hoạt</MenuItem>
+                      <MenuItem value={false}>Không kích hoạt</MenuItem>
+                    </Select>
+                  </FormControl>
+
+                  {/* Roles Selection */}
+                  <FormControl component="fieldset" margin="normal">
+                    <FormGroup>
+                      {roles.map((role) => (
+                        <FormControlLabel
+                          key={role.id}
+                          control={
+                            <Checkbox
+                              checked={values.roles.includes(role.id)}
+                              onChange={(event) => {
+                                const updatedRoles = event.target.checked
+                                  ? [...values.roles, role.id]
+                                  : values.roles.filter((id) => id !== role.id);
+                                setFieldValue("roles", updatedRoles);
+                              }}
+                            />
+                          }
+                          label={role.name}
                         />
-                      }
-                      label={role.name}
-                    />
-                  ))}
-                </FormGroup>
-              </FormControl>
+                      ))}
+                    </FormGroup>
+                  </FormControl>
+                </Grid>
+              </Grid>
             </Form>
           )}
         </Formik>

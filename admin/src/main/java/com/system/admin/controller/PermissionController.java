@@ -38,6 +38,11 @@ public class PermissionController {
         Permission newPermission = service.savePermission(permission);
         return ResponseEntity.ok(newPermission);
     }
+    @PutMapping("/permissions/{id}")
+    public ResponseEntity<Permission> updatePermissions(@PathVariable Long id, @RequestBody Permission permission){
+        Permission updatePermission = service.updatePermission(id, permission);
+        return ResponseEntity.ok(updatePermission);
+    }
 
 
     // Xóa phân quyền

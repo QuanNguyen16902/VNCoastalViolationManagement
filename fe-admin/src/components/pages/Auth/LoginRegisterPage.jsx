@@ -61,7 +61,8 @@ function LoginPage() {
         }
       }
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "Có lỗi xảy ra!";
+      const errorMessage =
+        error.response?.data || "Có lỗi xảy ra 132 từ server!";
       toast.error(errorMessage);
       setIsLoading(false);
     }
@@ -128,12 +129,7 @@ function LoginPage() {
               </div>
             </div>
           )} */}
-          {isLoading && (
-            <div className="loading-overlay">
-              <div className="spinner"></div>
-              <p>Đang xử lý...</p>
-            </div>
-          )}
+
           <div className="support-info">
             <h5 className="fw-bold">Thông tin hỗ trợ:</h5>
             <p className="fw-medium">
@@ -145,6 +141,12 @@ function LoginPage() {
             </p>
           </div>
         </div>
+        {isLoading && (
+          <div className="loading-overlay">
+            <div className="spinner"></div>
+            <p>Đang xử lý...</p>
+          </div>
+        )}
       </div>
     </div>
   );

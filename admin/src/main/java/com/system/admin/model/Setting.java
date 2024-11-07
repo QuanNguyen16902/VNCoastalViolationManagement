@@ -20,4 +20,7 @@ public class Setting {
     @Column(name = "config_value", nullable = false)
     private String value;
 
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "user_id")
+//    private User user;
 }

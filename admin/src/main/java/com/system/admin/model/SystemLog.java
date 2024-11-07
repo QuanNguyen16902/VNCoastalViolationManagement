@@ -21,14 +21,15 @@ public class SystemLog {
     @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
-
     @Column(name = "action", nullable = false)
     private String action;
 
     @Column(name = "details", columnDefinition = "TEXT")
     private String details;
+
+    @ManyToOne(fetch = FetchType.LAZY) // Thiết lập mối quan hệ ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     public SystemLog() {
         this.timestamp = LocalDateTime.now(); // Mặc định lấy thời gian hiện tại

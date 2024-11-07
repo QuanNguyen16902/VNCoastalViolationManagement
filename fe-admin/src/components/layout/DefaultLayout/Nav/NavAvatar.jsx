@@ -1,13 +1,28 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import authService from "../../../../service/auth.service";
+import userService from "../../../../service/user.service";
 import { getUserFromToken } from "../../../../utils/auth";
 import "../../../pages/Auth/loading.css";
 function NavAvatar() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const [userDetails, setUserDetails] = useState({});
   const currentUser = getUserFromToken();
-
+  const fetchUser = async () => {
+    try {
+      if (currentUser) {
+        const response = await userService.getUser(currentUser.id);
+        setUserDetails(response.data.profile);
+      }
+    } catch (error) {
+      toast.error(error.response.data || "Lỗi truy xuất người dùng");
+    }
+  };
+  useEffect(() => {
+    fetchUser();
+  }, []);
   const handleLogout = async (event) => {
     event.preventDefault(); // Ngăn chặn hành vi mặc định của thẻ <a>
     setIsLoading(true); // Bắt đầu hiển thị loading
@@ -40,40 +55,49 @@ function NavAvatar() {
         }}
       >
         <span className="d-none d-md-block dropdown-toggle ps-2">
-          {currentUser ? currentUser.username : "Guest"}
+          {currentUser ? userDetails?.fullName : "Guest"}
           <img
             src={
-              "https://th.bing.com/th/id/OIP.ghZN_FaqJ8PdAWZKqcsU0wHaE6?w=244&h=180&c=7&r=0&o=5&pid=1.7"
+              currentUser && userDetails?.photo
+                ? userDetails.photo // Cloud URL of the user's profile image
+                : "https://th.bing.com/th/id/OIP.ghZN_FaqJ8PdAWZKqcsU0wHaE6?w=244&h=180&c=7&r=0&o=5&pid=1.7" // Default guest image
             }
             className="rounded-circle ms-1"
             alt="Profile"
           />
         </span>
       </a>
-      <ul
-        className="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile"
-        style={{ minWidth: "250px" }}
-      >
+      <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
         <li
           className="dropdown-header"
           style={{ whiteSpace: "normal", wordWrap: "break-word" }}
         >
           <h6>{currentUser ? currentUser.username : "Guest"}</h6>
-          <span className="overflow">
-            Quyền:{" "}
-            {currentUser && Array.isArray(currentUser.roles)
-              ? currentUser.roles.map((role) => role.authority).join(", ")
-              : "N/A"}
-          </span>
+          {currentUser && (
+            <>
+              <span>Tên cán bộ: {userDetails?.fullName || "Chưa có"}</span>
+              <br />
+              <span className="">
+                Quyền:{" "}
+                {Array.isArray(currentUser.roles)
+                  ? currentUser.roles.map((role) => role.authority).join(", ")
+                  : "N/A"}
+              </span>
+            </>
+          )}
         </li>
+
         <li>
           <hr className="dropdown-divider" />
         </li>
         <li>
-          <a className="dropdown-item d-flex align-items-center" href="#">
+          <Link
+            className="dropdown-item d-flex align-items-center"
+            to={"/user-detail"}
+          >
             <i className="bi bi-person"></i>
-            <span>Hồ sơ cá nhân</span>
-          </a>
+            <span>Thông tin cá nhân</span>
+          </Link>
         </li>
         <li>
           <hr className="dropdown-divider" />

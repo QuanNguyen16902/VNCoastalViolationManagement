@@ -19,6 +19,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 
 @Configuration
@@ -64,6 +66,7 @@ public class WebSecurityConfig {
                         auth.requestMatchers("/api/admin/auth/**").permitAll()
                                 .requestMatchers("/vnpay/**").permitAll()
                                 .requestMatchers("/vnpay/return").permitAll()
+                                .requestMatchers("/api/admin/export/**").permitAll()
                                 .requestMatchers("/api/admin/users/**").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/api/admin/users/{id}").hasAuthority("VIEW_USER")
                                 .requestMatchers(HttpMethod.PUT, "/api/admin/users/{id}").hasAuthority("EDIT_USER")
@@ -87,6 +90,19 @@ public class WebSecurityConfig {
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+       http.headers(header -> header.frameOptions(f -> f.sameOrigin()));
         return http.build();
    }
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                        .allowedOrigins("*")
+                        .allowedMethods("HEAD","GET","POST","PUT","DELETE","PATCH","OPTIONS");
+            }
+        };
+    }
+
 }

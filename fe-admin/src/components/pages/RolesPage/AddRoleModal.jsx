@@ -35,7 +35,7 @@ function AddRoleDialog({ open, onClose, onAddRole }) {
       let errorMessage = "Đã xảy ra lỗi!";
 
       if (error.response) {
-        errorMessage = error.response.data?.message || "Có lỗi xảy ra!";
+        errorMessage = error.response.data || "Có lỗi xảy ra!";
       } else if (error.message) {
         errorMessage = error.message;
       }

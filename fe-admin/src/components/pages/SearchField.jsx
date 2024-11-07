@@ -1,7 +1,7 @@
 import { Button, TextField } from "@mui/material";
 import React, { useState } from "react";
 
-function SearchField({ label, onSearch }) {
+function SearchField({ label, onSearch, name }) {
   const [searchValue, setSearchValue] = useState("");
 
   // Cập nhật giá trị searchValue khi người dùng nhập vào TextField
@@ -15,13 +15,11 @@ function SearchField({ label, onSearch }) {
   };
 
   return (
-    <div
-      style={{ display: "flex", alignItems: "center", marginTop: "0px" }}
-    >
+    <div style={{ display: "flex", alignItems: "center", marginTop: "0px" }}>
       <TextField
         label={label}
         type="search"
-        name="username"
+        name={name}
         variant="outlined"
         value={searchValue} // Đặt giá trị của TextField là searchValue
         onChange={handleInputChange} // Cập nhật searchValue khi giá trị thay đổi

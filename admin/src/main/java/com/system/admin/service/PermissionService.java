@@ -1,6 +1,7 @@
 package com.system.admin.service;
 
 import com.system.admin.exception.PermissionNotFoundException;
+import com.system.admin.exception.UserNotFoundException;
 import com.system.admin.model.Permission;
 import com.system.admin.repository.PermissionRepository;
 import jakarta.transaction.Transactional;
@@ -27,6 +28,14 @@ public class PermissionService {
     }
     public Optional<Permission> findById(Long id){
         return permissionRepository.findById(id);
+    }
+
+    public Permission updatePermission(Long id, Permission permission){
+        Permission updatePermission = permissionRepository.findById(id).orElseThrow(() -> new UserNotFoundException("Không tìm thấy quyền với ID " + id));
+        updatePermission.setName(permission.getName());
+        updatePermission.setDescription(permission.getDescription());
+        permissionRepository.save(updatePermission);
+        return updatePermission;
     }
 
     public void deleteById(Long id){

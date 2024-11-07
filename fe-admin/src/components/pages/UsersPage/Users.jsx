@@ -61,7 +61,7 @@ function Users() {
       fetchUsers(); // Cập nhật lại danh sách sau khi xóa
       toast.success("Xóa thành công!");
     } catch (error) {
-      toast.error("Xóa không thành công!");
+      toast.error(error.response.data);
     } finally {
       setOpenDelete(false);
     }
@@ -96,6 +96,7 @@ function Users() {
       email: item.email,
       enabled: item.enabled,
       roles: item.roles || [],
+      profile: item.profile || {},
     })
   );
 
@@ -110,6 +111,7 @@ function Users() {
           <img
             className="cellImg"
             src={
+              params.row.profile?.photo ||
               "https://th.bing.com/th/id/OIP.ghZN_FaqJ8PdAWZKqcsU0wHaE6?w=244&h=180&c=7&r=0&o=5&pid=1.7"
             }
             alt="avatar"
@@ -220,7 +222,11 @@ function Users() {
     <div className="datatable">
       <div className="datatableTitle">
         Danh sách Người dùng
-        <SearchField label={"Tra cứu người dùng"} onSearch={handleSearch} />
+        <SearchField
+          label={"Tra cứu người dùng"}
+          onSearch={handleSearch}
+          name={"username"}
+        />
         <button className="link" onClick={() => setOpenAdd(true)}>
           <i className="bi bi-person-add hover"></i>&nbsp;
           <span>Thêm</span>

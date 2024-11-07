@@ -1,10 +1,14 @@
 package com.system.admin.model.token;
 
+import com.system.admin.model.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+
 @Getter
 @Setter
 @Entity
@@ -25,5 +29,10 @@ public class PasswordResetToken {
     @Column(nullable = false)
     private Date expiryDate;
 
-    // Getters and Setters
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+    // Mối quan hệ với PasswordResetToken
+
+
 }

@@ -38,6 +38,7 @@ public class VnPayController {
     public RedirectView getPay(@RequestParam Map<String, String> allParams) throws UnsupportedEncodingException{
         String decisionId = allParams.get("vnp_TxnRef");
         decisionService.updateDecisionPaidStatus(Integer.valueOf(decisionId), true);
+        decisionService.getById(Long.valueOf(decisionId)).getBienBanViPham().setResolved(true);
         return new RedirectView("http://localhost:3000/payment-success?vnp_TxnRef=" + decisionId);
     }
 

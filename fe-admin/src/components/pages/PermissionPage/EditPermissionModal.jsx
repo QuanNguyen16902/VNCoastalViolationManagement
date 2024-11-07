@@ -13,11 +13,16 @@ import * as Yup from "yup";
 import permissionService from "../../../service/permission.service";
 
 const validationSchema = Yup.object({
-  name: Yup.string().required('Chưa điền tên quyền'),
-  description: Yup.string().required('Chưa điền mô tả'),
+  name: Yup.string().required("Chưa điền tên quyền"),
+  description: Yup.string().required("Chưa điền mô tả"),
 });
 
-function EditPermissionModal({ open, onClose, onEditPermission, permissionId }) {
+function EditPermissionModal({
+  open,
+  onClose,
+  onEditPermission,
+  permissionId,
+}) {
   const [permission, setRole] = useState(null);
 
   useEffect(() => {
@@ -39,7 +44,7 @@ function EditPermissionModal({ open, onClose, onEditPermission, permissionId }) 
     try {
       const permissionData = {
         ...values,
-        };
+      };
       await permissionService.editPermission(permissionId, permissionData);
       toast.success("Quyền đã được cập nhật thành công!");
       onEditPermission();
@@ -57,7 +62,9 @@ function EditPermissionModal({ open, onClose, onEditPermission, permissionId }) 
       onClose={onClose}
       aria-labelledby="edit-permission-dialog-title"
     >
-      <DialogTitle id="edit-permission-dialog-title">Chỉnh sửa phân Quyền</DialogTitle>
+      <DialogTitle id="edit-permission-dialog-title">
+        Chỉnh sửa phân Quyền
+      </DialogTitle>
       <DialogContent>
         {permission ? (
           <Formik
@@ -67,16 +74,8 @@ function EditPermissionModal({ open, onClose, onEditPermission, permissionId }) 
             }}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
-            
           >
-            {({
-              values,
-              handleChange,
-              handleBlur,
-              setFieldValue,
-              errors,
-              touched,
-            }) => (
+            {({ handleChange, handleBlur, errors, touched }) => (
               <Form id="form-edit-permission">
                 <Field
                   as={TextField}

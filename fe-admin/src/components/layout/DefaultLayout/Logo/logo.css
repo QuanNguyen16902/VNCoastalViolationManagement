@@ -4,7 +4,7 @@
 
 @media (min-width: 1200px) {
     .logo{
-        width: 280px;
+        width: 300px;
     }
 }
 
@@ -13,10 +13,33 @@
     margin-right: 3px;
 }
 
-.logo span{
-    font-size: 26px;
-    font-weight: 700;
-    color: #012970;
-    font-family: 'Nunito', sans-serif;
+
+
+.home-icon {
+    width: 44px;
+    height: 40px;
+    /* background-color: rgb(228, 235, 243); */
 }
- 
+.home-icon {
+    background-image: url("../../../../images/logo-main-1.png")
+}
+.header-top1, .header-top2 {
+    font-weight: 700;
+    font-family: Arial, sans-serif;
+    display: block;
+}
+
+.header-top1 {
+    color: #73818f;
+    font-size: 12px;
+    padding-top: 8px;
+}
+.header-top2 {
+    color: #26408b;
+    font-size: 16px;
+}
+.header-top1, .header-top2 {
+    font-weight: 700;
+    font-family: Arial, sans-serif;
+    display: block;
+}

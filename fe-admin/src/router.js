@@ -3,7 +3,7 @@ import ResetPasswordPage from "./components/pages/Auth/forgot-password/ResetPass
 import LoginPage from "./components/pages/Auth/LoginRegisterPage";
 import Dashboard from "./components/pages/Dashboard/Dashboard";
 import AddPenaltyDecision from "./components/pages/PenaltyDecision/AddPenaltyDecision";
-import PenaltyDecision from "./components/pages/PenaltyDecision/ListDecision";
+import DecisionMain from "./components/pages/PenaltyDecision/DecisionMain";
 import PaymentFailure from "./components/pages/PenaltyDecision/Payment/PaymentFailure";
 import PaymentSuccess from "./components/pages/PenaltyDecision/Payment/PaymentSuccess";
 import VnPayForm from "./components/pages/PenaltyDecision/Payment/VnpayForm";
@@ -11,11 +11,13 @@ import Permissions from "./components/pages/PermissionPage/Permissions";
 import CardBox from "./components/pages/reports/report";
 import Roles from "./components/pages/RolesPage/Roles";
 import Settings from "./components/pages/SettingPage/Settings";
-import SystemLogs from "./components/pages/SystemLog";
+import SystemLogs from "./components/pages/SystemLog/SystemLog";
+import UserProfile from "./components/pages/UserProfile/UserProfile";
 import UsersGroup from "./components/pages/UsersGroupPage/UsersGroup";
 import Users from "./components/pages/UsersPage/Users";
-import AddViolationRecord from "./components/pages/ViolationRecord/AddViolationRecord";
-import ViolationRecords from "./components/pages/ViolationRecord/ListViolation";
+import ViolationPeople from "./components/pages/ViolationPeople/ViolationPeople";
+import AddViolationRecord from "./components/pages/ViolationRecord/AddViolation/AddViolationRecord";
+import ViolationMain from "./components/pages/ViolationRecord/ViolationMain";
 const publicRoutes = [
   {
     path: "/login",
@@ -44,8 +46,8 @@ const privateRoutes = [
   {
     path: "/roles",
     component: Roles,
-    pageTitle: "Quản lý quyền",
-    childPage: "Danh sách quyền (Roles)",
+    pageTitle: "Quản lý vai trò",
+    childPage: "Danh sách vai trò (Roles)",
   },
   {
     path: "/permissions",
@@ -60,6 +62,11 @@ const privateRoutes = [
     childPage: "Danh sách người dùng",
   },
   {
+    path: "/user-detail",
+    component: UserProfile,
+    pageTitle: "Hồ sơ người dùng",
+  },
+  {
     path: "/users-group",
     component: UsersGroup,
     pageTitle: "Quản lý nhóm người dùng",
@@ -68,6 +75,12 @@ const privateRoutes = [
   { path: "/logs", component: SystemLogs, pageTitle: "Nhật ký hệ thống" },
   { path: "/settings", component: Settings, pageTitle: "Settings" },
   {
+    path: "/violation-person",
+    component: ViolationPeople,
+    pageTitle: "Người vi phạm",
+    // layout: BienBan,
+  },
+  {
     path: "/violation-records/new",
     component: AddViolationRecord,
     pageTitle: "Biên bản vi phạm",
@@ -75,14 +88,14 @@ const privateRoutes = [
   },
   {
     path: "/violation-records",
-    component: ViolationRecords,
+    component: ViolationMain,
     pageTitle: "Biên bản vi phạm",
     childPage: "Danh sách",
     // layout: BienBan,
   },
   {
     path: "/penalty-decision",
-    component: PenaltyDecision,
+    component: DecisionMain,
     pageTitle: "Quyết định xử phạt",
     childPage: "Danh sách",
     // layout: BienBan,
@@ -97,7 +110,6 @@ const privateRoutes = [
     path: "/report",
     component: CardBox,
     pageTitle: "Báo cáo",
-    // layout: BienBan,
   },
   {
     path: "/payment",

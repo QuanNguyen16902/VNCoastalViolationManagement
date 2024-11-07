@@ -78,9 +78,11 @@ function App() {
               element={
                 <PrivateRoute
                   element={
-                    <Layout pageTitle={pageTitle} childPage={childPageTitle}>
-                      <Page />
-                    </Layout>
+                    <Layout
+                      pageTitle={pageTitle}
+                      childPage={childPageTitle}
+                      children={<Page />}
+                    ></Layout>
                   }
                 />
               }
