@@ -65,7 +65,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/admin/auth/**").permitAll()
                                 .requestMatchers("/vnpay/**").permitAll()
-                                .requestMatchers("/vnpay/return").permitAll()
+                                .requestMatchers("/api/admin/reports/**").permitAll()
                                 .requestMatchers("/api/admin/export/**").permitAll()
                                 .requestMatchers("/api/admin/users/**").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/api/admin/users/{id}").hasAuthority("VIEW_USER")
@@ -93,16 +93,16 @@ public class WebSecurityConfig {
        http.headers(header -> header.frameOptions(f -> f.sameOrigin()));
         return http.build();
    }
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins("*")
-                        .allowedMethods("HEAD","GET","POST","PUT","DELETE","PATCH","OPTIONS");
-            }
-        };
-    }
+//    @Bean
+//    public WebMvcConfigurer corsConfigurer() {
+//        return new WebMvcConfigurer() {
+//            @Override
+//            public void addCorsMappings(CorsRegistry registry) {
+//                registry.addMapping("/**")
+//                        .allowedOrigins("*")
+//                        .allowedMethods("HEAD","GET","POST","PUT","DELETE","PATCH","OPTIONS");
+//            }
+//        };
+//    }
 
 }

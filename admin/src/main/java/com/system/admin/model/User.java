@@ -67,17 +67,6 @@ public class User {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Profile profile;
-//
-//    @PostPersist
-//    public void createProfile() {
-//        if (this.profile == null) {
-//            Profile profile = new Profile();
-//            profile.setUser(this);
-//            profile.setId(this.id);
-////            profile.setFullName(this.username); // Hoặc giá trị khác tùy ý
-//            this.profile = profile;
-//        }
-//    }
 
     // Quan hệ OneToMany với PenaltyDecision
     @OneToMany(mappedBy = "nguoiThiHanh")

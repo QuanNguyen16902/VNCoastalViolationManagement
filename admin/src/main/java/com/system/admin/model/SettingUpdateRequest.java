@@ -10,6 +10,14 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SettingUpdateRequest {
+    //General Setting
+    private String siteName;
+    private String subSiteName;
+    private String footerText;
+    private String logoUrl;
+    private String websiteDescription;
+
+    // Token Setting
     private String tokenSecret;
     private int tokenExpiry;
 
@@ -20,4 +28,8 @@ public class SettingUpdateRequest {
     private String mailPassword;
     private String smtpAuth;
     private String smtpStartTls;
+
+    // Mail Template
+    private String mailViolationConfirmSubject;
+    private String mailViolationConfirmContent;
 }

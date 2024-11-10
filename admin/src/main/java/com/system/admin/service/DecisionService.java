@@ -94,19 +94,11 @@ public class DecisionService {
 
         Long violationId = penaltyDecision.getBienBanViPham().getId(); // Lấy ID từ biên bản vi phạm
 
-        // Kiểm tra nếu biên bản vi phạm đã có quyết định xử phạt
-        // Kiểm tra xem biên bản đã có quyết định xử phạt hay chưa
-//        if (decisionRepo.findByViolationId(violationId).isPresent()) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Biên bản vi phạm đã có quyết định xử phạt, không thể tạo quyết định mới.");
-//        }
-
 // Kiểm tra trùng lặp số văn bản nếu số văn bản đã tồn tại và không giống với số quyết định hiện tại
         boolean isDuplicateSoVanBan = decisionRepo.existBySoQuyetDinh(penaltyDecision.getSoQuyetDinh());
         if (isDuplicateSoVanBan && !existDecision.getSoQuyetDinh().equals(penaltyDecision.getSoQuyetDinh())) {
             throw new IllegalArgumentException("Số quyết định đã tồn tại trong hệ thống. Vui lòng sử dụng số khác.");
         }
-
-
 
         // Lấy thông tin người thi hành từ ID
         User executor = userRepo.findById(penaltyDecision.getNguoiThiHanh().getId())

@@ -24,5 +24,6 @@ public class ViolationShip {
     private long toaDoX;
     private long toaDoY;
     private String haiTrinhThucTe;
+    private Integer soLanViPham;
 
 }

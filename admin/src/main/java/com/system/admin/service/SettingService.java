@@ -1,10 +1,20 @@
 package com.system.admin.service;
 
+import com.system.admin.model.PenaltyDecision;
 import com.system.admin.model.Setting;
 import com.system.admin.model.SettingUpdateRequest;
 import com.system.admin.repository.SettingRepository;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.util.Properties;
 
 @Service
 public class SettingService {
@@ -43,11 +53,27 @@ public class SettingService {
         updateConfigValue("mailPassword", request.getMailPassword());
         updateConfigValue("smtpAuth", request.getSmtpAuth());
         updateConfigValue("smtpStartTls", request.getSmtpStartTls());
+        updateConfigValue("mailViolationConfirmSubject", request.getMailViolationConfirmSubject());
+        updateConfigValue("mailViolationConfirmContent", request.getMailViolationConfirmContent());
+
+        updateConfigValue("siteName", request.getSiteName());
+        updateConfigValue("subSiteName", request.getSubSiteName());
+        updateConfigValue("footerText", request.getFooterText());
+        updateConfigValue("logoUrl", request.getLogoUrl());
+        updateConfigValue("websiteDescription", request.getWebsiteDescription());
     }
 
 
     public SettingUpdateRequest getCurrentConfig() {
         SettingUpdateRequest config = new SettingUpdateRequest();
+
+        config.setSiteName(settingRepository.findByKey("siteName").getValue());
+        config.setSubSiteName(settingRepository.findByKey("subSiteName").getValue());
+        config.setFooterText(settingRepository.findByKey("footerText").getValue());
+        config.setLogoUrl(settingRepository.findByKey("logoUrl").getValue());
+        config.setWebsiteDescription(settingRepository.findByKey("websiteDescription").getValue());
+
+
         config.setTokenExpiry(Integer.parseInt(settingRepository.findByKey("jwtExpirationMs").getValue()));
         config.setTokenSecret(settingRepository.findByKey("jwtSecret").getValue());
 
@@ -59,6 +85,11 @@ public class SettingService {
         config.setSmtpStartTls(settingRepository.findByKey("smtpStartTls").getValue());
 
 
+        config.setMailViolationConfirmSubject(settingRepository.findByKey("mailViolationConfirmSubject").getValue());
+        config.setMailViolationConfirmContent(settingRepository.findByKey("mailViolationConfirmContent").getValue());
+
+
         return config;
     }
-}
+
+   }

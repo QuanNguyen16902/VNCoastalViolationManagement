@@ -37,32 +37,4 @@ public class MailConfigService {
         return config;
     }
 
-//    // Update mail configuration and apply changes to JavaMailSender
-//    public void updateMailConfig(MailConfig config) {
-//        updateConfigValue("mailHost", config.getMailHost());
-//        updateConfigValue("mailPort", String.valueOf(config.getMailPort()));
-//        updateConfigValue("mailUsername", config.getMailUsername());
-//        updateConfigValue("mailPassword", config.getMailPassword());
-//        updateConfigValue("smtpAuth", String.valueOf(config.isSmtpAuth()));
-//        updateConfigValue("smtpStartTls", String.valueOf(config.isSmtpStartTls()));
-//        updateConfigValue("fromAddress", config.getFromAddress());
-//        updateConfigValue("senderName", config.getSenderName());
-//
-//        // Apply updated configuration to JavaMailSender
-//    }
-//
-//    // Helper method to update configuration in the database
-//    private void updateConfigValue(String key, String value) {
-//        Setting config = appConfigRepository.findByKey(key);
-//        if (config != null) {
-//            config.setValue(value);
-//        } else {
-//            config = new Setting();
-//            config.setKey(key);
-//            config.setValue(value);
-//        }
-//        appConfigRepository.save(config);
-//    }
-
-
 }

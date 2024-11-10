@@ -1,5 +1,7 @@
 package com.system.admin.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,8 +31,13 @@ public class SystemLog {
 
     @ManyToOne(fetch = FetchType.LAZY) // Thiết lập mối quan hệ ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
+    @JsonProperty("user_id")
+    public Long getViolationRecordId() {
+        return user != null ? user.getId() : null;
+    }
     public SystemLog() {
         this.timestamp = LocalDateTime.now(); // Mặc định lấy thời gian hiện tại
     }

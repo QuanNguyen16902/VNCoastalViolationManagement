@@ -151,7 +151,9 @@ public class JasperReportService {
                 throw new RuntimeException(e);
             }
         }
-        String pdfLink = "http://192.168.102.13:8080/api/admin/auth/view-report?id=" + item.getId() + "&format=" + format;
+//        String pdfLink = "http://localhost:8080/api/admin/auth/view-report?id=" + item.getId() + "&format=" + format;
+//        String pdfLink = "http://localhost:8080/api/admin/penalty-decision/" + item.getId();
+        String pdfLink = "http://192.168.110.215:3000/report";
         BufferedImage qrCodeImage = generateQRCodeImage(pdfLink); // Create this method
 
         // Convert BufferedImage to Image for JasperReports

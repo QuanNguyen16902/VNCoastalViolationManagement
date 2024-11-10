@@ -1,6 +1,7 @@
 package com.system.admin.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.system.admin.model.ViolationRecord.ViolationRecord;
 
 import jakarta.persistence.*;
@@ -42,6 +43,11 @@ public class SeizedItem {
     @JsonIgnore
     private ViolationRecord violationRecord;
 
+    // Getter cho violationRecordId để trả về id khi GET
+    @JsonProperty("violation_record_id")
+    public Long getViolationRecordId() {
+        return violationRecord != null ? violationRecord.getId() : null;
+    }
 
     public SeizedItem(String itemName, String description, String quantity, String status, LocalDateTime seizureDate, ViolationRecord violationRecord) {
         this.itemName = itemName;
