@@ -2,6 +2,7 @@ import { Alert, Spin, Table, Tag } from "antd"; // Hoặc bất kỳ thư viện
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import authHeader from "../../../service/auth-header";
+import apiConfig from "../../../utils/config";
 import "../datatable.css";
 const SystemLogs = () => {
   const [logs, setLogs] = useState([]);
@@ -11,10 +12,10 @@ const SystemLogs = () => {
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:8080/api/admin/logs",
-          { headers: authHeader() }
-        );
+        const response = await axios.get(`${apiConfig.apiBaseUrl}logs`, {
+          headers: authHeader(),
+        });
+        console.log(response.data);
         setLogs(response.data);
       } catch (err) {
         setError(err.message);

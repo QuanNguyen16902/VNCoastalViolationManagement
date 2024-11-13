@@ -15,7 +15,9 @@ import SystemLogs from "./components/pages/SystemLog/SystemLog";
 import UserProfile from "./components/pages/UserProfile/UserProfile";
 import UsersGroup from "./components/pages/UsersGroupPage/UsersGroup";
 import Users from "./components/pages/UsersPage/Users";
-import ViolationPeople from "./components/pages/ViolationPeople/ViolationPeople";
+import SeizedItem from "./components/pages/ViolationChild/SeizedItem/SeizedItem";
+import ViolationPerson from "./components/pages/ViolationChild/ViolationPeople/ViolationPeople";
+import ViolationShip from "./components/pages/ViolationChild/ViolationShip/ViolationShip";
 import AddViolationRecord from "./components/pages/ViolationRecord/AddViolation/AddViolationRecord";
 import ViolationMain from "./components/pages/ViolationRecord/ViolationMain";
 const publicRoutes = [
@@ -76,8 +78,20 @@ const privateRoutes = [
   { path: "/settings", component: Settings, pageTitle: "Settings" },
   {
     path: "/violation-person",
-    component: ViolationPeople,
+    component: ViolationPerson,
     pageTitle: "Người vi phạm",
+    // layout: BienBan,
+  },
+  {
+    path: "/violation-ship",
+    component: ViolationShip,
+    pageTitle: "Tàu vi phạm",
+    // layout: BienBan,
+  },
+  {
+    path: "/seized-items",
+    component: SeizedItem,
+    pageTitle: "Tang vật",
     // layout: BienBan,
   },
   {

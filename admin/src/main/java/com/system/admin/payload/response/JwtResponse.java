@@ -16,8 +16,9 @@ public class JwtResponse {
     private String email;
     private List<String> roles;
     private List<String> permissions;
+    private List<String> rolesOfGroup;
 
-    public JwtResponse(String accessToken, String refreshToken, Long id, String username, String email, List<String> roles, List<String> permissions ) {
+    public JwtResponse(String accessToken, String refreshToken, Long id, String username, String email, List<String> roles, List<String> permissions , List<String> rolesOfGroup ) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.id = id;
@@ -25,6 +26,7 @@ public class JwtResponse {
         this.email = email;
         this.roles = roles;
         this.permissions = permissions;
+        this.rolesOfGroup =rolesOfGroup;
     }
 
 }

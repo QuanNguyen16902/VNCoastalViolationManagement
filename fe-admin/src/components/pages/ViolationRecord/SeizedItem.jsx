@@ -9,6 +9,7 @@ import {
   Table,
 } from "antd";
 import React from "react";
+import { formatDate } from "../../../utils/format";
 
 const { Option } = Select;
 
@@ -51,7 +52,7 @@ const TangVatForm = ({ tangVats, onTangVatsChange }) => {
       title: "Ngày Thu Giữ",
       dataIndex: "seizureDate",
       key: "seizureDate",
-      render: (date) => date && date.format("YYYY-MM-DD"),
+      render: (date) => date && formatDate(date),
     },
     {
       title: "Trạng Thái",

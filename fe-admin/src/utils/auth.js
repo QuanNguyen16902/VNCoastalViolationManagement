@@ -16,6 +16,7 @@ export const removeToken = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
   localStorage.removeItem("userRoles");
+  localStorage.removeItem("rolesOfGroup");
 };
 
 // Lấy thông tin người dùng từ token

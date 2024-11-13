@@ -11,14 +11,18 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useUserRoles } from "../../../hooks/useUserRoles";
 import UserService from "../../../service/user.service";
+import AccessDenied from "../../layout/Error/AccessDenied";
 import "../datatable.css";
 import SearchField from "../SearchField";
 import AddUserModal from "./AddUserModal";
 import EditUserModal from "./EditUserModal";
 
 function Users() {
-  const roles = useUserRoles();
-  const canView = roles.includes("ROLE_ADMIN");
+  const { userRoles, groupRoles } = useUserRoles();
+  // Kiểm tra nếu "ROLE_ADMIN" có trong cả userRoles và groupRoles
+  const canView = [...userRoles, ...groupRoles].includes("ROLE_ADMIN");
+
+  console.log(canView); // Trả về true nếu có ROLE_ADMIN
 
   const [data, setData] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -197,25 +201,7 @@ function Users() {
   }
 
   if (!canView) {
-    return (
-      <div className="d-flex justify-content-center align-items-center">
-        <div
-          className="text-center p-4"
-          style={{
-            borderRadius: "10px",
-            backgroundColor: "#e7f3fe",
-            border: "2px solid #007bff",
-            maxWidth: "500px",
-          }}
-        >
-          <i
-            className="bi bi-exclamation-octagon fw-bold text-primary"
-            style={{ fontSize: "48px" }}
-          ></i>
-          <h4 className="mt-3">Bạn không có quyền xem danh sách người dùng</h4>
-        </div>
-      </div>
-    );
+    return <AccessDenied />;
   }
 
   return (

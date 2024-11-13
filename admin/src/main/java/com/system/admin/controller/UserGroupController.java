@@ -2,6 +2,7 @@ package com.system.admin.controller;
 
 import com.system.admin.model.Permission;
 import com.system.admin.model.UserGroup;
+import com.system.admin.payload.request.AddUsersToGroupRequest;
 import com.system.admin.payload.request.UserGroupRequest;
 import com.system.admin.service.UserGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,17 +39,15 @@ public class UserGroupController {
     }
 
 
-    @PostMapping("/users-group/{groupId}/add-user/{userId}")
-    public ResponseEntity<UserGroup> addUserToGroup(@PathVariable Long groupId, @PathVariable Long userId) {
-        UserGroup updatedGroup = userGroupService.addUserToGroup(groupId, userId);
-        return ResponseEntity.ok(updatedGroup);
-    }
-    @PostMapping("/users-group/{groupId}/add-role/{roleId}")
-    public ResponseEntity<UserGroup> addRoleToGroup(@PathVariable Long groupId, @PathVariable Long roleId) {
-        UserGroup updatedGroup = userGroupService.addRoleToGroup(groupId, roleId);
-        return ResponseEntity.ok(updatedGroup);
-    }
+    @PostMapping("/users-group/{groupId}/add-users")
+    public ResponseEntity<?> addUsersToGroup(
+            @PathVariable Long groupId,
+            @RequestBody AddUsersToGroupRequest request) {
 
+        userGroupService.editUsersToGroup(groupId, request.getUserIds());
+
+        return ResponseEntity.ok("Cập nhật thành công");
+    }
 
 
     @GetMapping("/users-group/{id}")
@@ -65,7 +64,6 @@ public class UserGroupController {
         UserGroup updatedGroup = userGroupService.updateUserGroup(id,
                                 userGroup.getName(),
                                 userGroup.getDescription(),
-                                userGroup.getUserIds(),
                                 userGroup.getRoleIds());
         return ResponseEntity.ok(updatedGroup);
     }

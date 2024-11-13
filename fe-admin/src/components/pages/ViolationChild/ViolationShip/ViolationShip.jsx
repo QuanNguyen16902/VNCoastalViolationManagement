@@ -1,22 +1,22 @@
 import { DataGrid } from "@mui/x-data-grid";
 import React, { useEffect, useState } from "react";
-import { useUserRoles } from "../../../hooks/useUserRoles";
-import violationPersonService from "../../../service/violation-person.service";
-import "../datatable.css";
-import SearchField from "../SearchField";
-import EditViolationPersonDialog from "./EditViolationPersonModal";
-
-function ViolationPerson() {
-  const roles = useUserRoles();
-  const canView = roles.includes("ROLE_ADMIN");
+import { useUserRoles } from "../../../../hooks/useUserRoles";
+import violationPersonService from "../../../../service/violation-info.service";
+import AccessDenied from "../../../layout/Error/AccessDenied";
+import SearchField from "../../SearchField";
+import "../../datatable.css";
+import EditViolationShipDialog from "./EditViolationShipModal";
+function ViolationShip() {
+  const { userRoles, groupRoles } = useUserRoles();
+  // Kiểm tra nếu "ROLE_ADMIN" có trong cả userRoles và groupRoles
+  const canView = [...userRoles, ...groupRoles].includes("ROLE_ADMIN");
 
   const [data, setData] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
   const [openDelete, setOpenDelete] = useState(false);
-  const [openAdd, setOpenAdd] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [openEdit, setOpenEdit] = useState(false);
-  const [editUserId, setEditUserId] = useState(null);
+  const [editShipId, setEditUserId] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(true); // Thêm trạng thái loading
   const handleClose = () => {
@@ -24,15 +24,15 @@ function ViolationPerson() {
   };
 
   // Fetch users with optional search keyword
-  const fetchViolationPerson = async (keyword = "") => {
+  const fetchViolationShip = async (keyword = "") => {
     setLoading(true); // Bắt đầu trạng thái loading
     try {
       let response;
       if (keyword) {
-        response = await violationPersonService.searchViolationPerson(keyword);
+        response = await violationPersonService.searchViolationShip(keyword);
         setSearchResults(response.data);
       } else {
-        response = await violationPersonService.listViolationPerson();
+        response = await violationPersonService.listViolationShip();
         setData(response.data);
         setSearchResults([]);
       }
@@ -44,15 +44,8 @@ function ViolationPerson() {
   };
 
   useEffect(() => {
-    fetchViolationPerson();
+    fetchViolationShip();
   }, []);
-
-  // Handle delete dialog
-
-  const handleOpenDeleteDialog = (id) => {
-    setDeleteId(id);
-    setOpenDelete(true);
-  };
 
   // Handle edit user
   const handleEditUser = (userId) => {
@@ -62,19 +55,19 @@ function ViolationPerson() {
 
   // Handle search
   const handleSearch = (keyword) => {
-    fetchViolationPerson(keyword);
+    fetchViolationShip(keyword);
   };
 
   // Prepare data for DataGrid
   const rows = (searchResults.length > 0 ? searchResults : data).map(
     (item) => ({
       id: item.id,
-      nguoiViPham: item.nguoiViPham || "",
-      email: item.email || "",
-      quocTich: item.quocTich || "",
-      soLanViPham: item.soLanViPham || "",
-      namSinh: item.namSinh || "",
-      cccd: item.canCuoc || "",
+      soHieuTau: item.soHieuTau || "",
+      diaDiem: item.diaDiem || "",
+      tongDungTich: item.tongDungTich || "",
+      congSuat: item.congSuat || "",
+      haiTrinhCapPhep: item.haiTrinhCapPhep || "",
+      toaDo: `(${item.toaDoX || ""}, ${item.toaDoY || ""})`,
     })
   );
   const columns = [
@@ -86,37 +79,46 @@ function ViolationPerson() {
       headerAlign: "center",
     },
     {
-      field: "nguoiViPham",
-      headerName: "Tên",
+      field: "soHieuTau",
+      headerName: "Số hiệu tàu",
       width: 180,
       align: "center",
       headerAlign: "center",
     },
     {
-      field: "email",
-      headerName: "Email",
-      width: 230,
-      align: "center",
-      headerAlign: "center",
-    },
-    {
-      field: "quocTich",
-      headerName: "Quốc tịch",
+      field: "tongDungTich",
+      headerName: "Tổng dung tích",
       width: 200,
       align: "center",
       headerAlign: "center",
+      renderCell: (params) => {
+        return <span className="rolesName">{params.value}</span>;
+      },
     },
     {
-      field: "cccd",
-      headerName: "CCCD",
+      field: "congSuat",
+      headerName: "Công suất",
+      width: 200,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => {
+        return <span className="rolesName">{params.value}</span>;
+      },
+    },
+    {
+      field: "toaDo",
+      headerName: "Tọa độ vi phạm",
       width: 180,
       align: "center",
       headerAlign: "center",
+      renderCell: (params) => {
+        return <span className="badgeName">{params.value}</span>;
+      },
     },
     {
-      field: "soLanViPham",
-      headerName: "Số lần vi phạm",
-      width: 140,
+      field: "haiTrinhCapPhep",
+      headerName: "Hải trình cấp phép",
+      width: 250,
       align: "center",
       headerAlign: "center",
     },
@@ -162,33 +164,15 @@ function ViolationPerson() {
   }
 
   if (!canView) {
-    return (
-      <div className="d-flex justify-content-center align-items-center">
-        <div
-          className="text-center p-4"
-          style={{
-            borderRadius: "10px",
-            backgroundColor: "#e7f3fe",
-            border: "2px solid #007bff",
-            maxWidth: "500px",
-          }}
-        >
-          <i
-            className="bi bi-exclamation-octagon fw-bold text-primary"
-            style={{ fontSize: "48px" }}
-          ></i>
-          <h4 className="mt-3">Bạn không có quyền xem danh sách người dùng</h4>
-        </div>
-      </div>
-    );
+    return <AccessDenied />;
   }
 
   return (
     <div className="datatable">
       <div className="datatableTitle">
-        Danh sách Người dùng
+        Danh sách Tàu vi phạm
         <SearchField
-          label={"Tra cứu người vi phạm"}
+          label={"Tra cứu tàu vi phạm"}
           onSearch={handleSearch}
           name={"username"}
         />
@@ -197,10 +181,6 @@ function ViolationPerson() {
         className="datagrid"
         rows={rows}
         columns={columns.concat(actionColumn)}
-        checkboxSelection
-        onSelectionModelChange={(ids) => {
-          setSelectedRows(ids);
-        }}
         initialState={{
           pagination: {
             paginationModel: { page: 0, pageSize: 5 },
@@ -209,15 +189,15 @@ function ViolationPerson() {
         pageSizeOptions={[5]}
       />
       {openEdit && (
-        <EditViolationPersonDialog
+        <EditViolationShipDialog
           open={openEdit}
           onClose={handleClose}
-          userId={editUserId}
-          onEditUser={() => fetchViolationPerson()} // Refetch users after editing
+          shipId={editShipId}
+          onEditShip={() => fetchViolationShip()} // Refetch users after editing
         />
       )}
     </div>
   );
 }
 
-export default ViolationPerson;
+export default ViolationShip;

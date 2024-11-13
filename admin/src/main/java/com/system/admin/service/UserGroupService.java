@@ -8,6 +8,7 @@ import com.system.admin.model.UserGroup;
 import com.system.admin.repository.RoleRepository;
 import com.system.admin.repository.UserGroupRepository;
 import com.system.admin.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -55,16 +56,10 @@ public class UserGroupService {
         return userGroupRepository.findById(id);
     }
 
-    public UserGroup updateUserGroup(Long id,  String name, String description, List<Long> userIds, List<Long> roleIds) {
+    public UserGroup updateUserGroup(Long id,  String name, String description, List<Long> roleIds) {
         UserGroup existingGroup = userGroupRepository.findById(id).orElseThrow(() -> new RuntimeException("Group not found"));
         existingGroup.setName(name);
         existingGroup.setDescription(description);
-
-        // Tìm danh sách users dựa trên ID
-        if (userIds != null && !userIds.isEmpty()) {
-            Set<User> users = new HashSet<>(userRepository.findAllById(userIds));
-            existingGroup.setUsers(users);
-        }
 
         // Tìm danh sách roles dựa trên ID
         if (roleIds != null && !roleIds.isEmpty()) {
@@ -78,5 +73,29 @@ public class UserGroupService {
     public void deleteUserGroup(Long id) {
         userGroupRepository.deleteById(id);
     }
+
+    @Transactional
+    public void editUsersToGroup(Long groupId, List<Long> userIds) {
+        // Tìm nhóm dựa trên groupId, nếu không có sẽ ném lỗi
+        UserGroup group = userGroupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+        // Lấy danh sách người dùng hiện có trong nhóm
+        Set<User> currentUsers = group.getUsers();
+
+        // Lấy danh sách người dùng từ userIds (danh sách mới cần cập nhật)
+        List<User> newUsers = userRepository.findAllById(userIds);
+        // Xóa những người dùng không còn trong danh sách mới
+        currentUsers.removeIf(user -> !newUsers.contains(user));
+
+        // Thêm những người dùng mới chưa có trong danh sách hiện tại
+        for (User user : newUsers) {
+            if (!currentUsers.contains(user)) {
+                currentUsers.add(user);
+            }
+        }
+        group.setUsers(currentUsers);
+        userGroupRepository.save(group);
+    }
+
 }
 

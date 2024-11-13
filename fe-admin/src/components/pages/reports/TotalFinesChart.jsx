@@ -12,7 +12,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import authHeader from "../../../service/auth-header";
-
+import apiConfig from "../../../utils/config";
 // Register the necessary Chart.js components
 ChartJS.register(
   CategoryScale,
@@ -34,7 +34,7 @@ const TotalFinesChart = ({ showByLast, option }) => {
   const fetchReportData = async (selectedOption) => {
     setLoading(true);
     setError(null);
-    let url = "http://localhost:8080/api/admin/reports/by_date/";
+    let url = `${apiConfig}reports/by_date/`;
 
     // Construct the URL based on the selected option
     switch (selectedOption) {

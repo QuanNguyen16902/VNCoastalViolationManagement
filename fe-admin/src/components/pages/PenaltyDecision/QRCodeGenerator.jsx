@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import React, { useState } from "react";
-
+import apiConfig from "../../../utils/config";
 const ReportGeneratorModal = ({ open, onClose, id }) => {
   const [format, setFormat] = useState("pdf");
   const [qrCode, setQrCode] = useState(null);
@@ -19,7 +19,7 @@ const ReportGeneratorModal = ({ open, onClose, id }) => {
   const generateQRCode = async () => {
     try {
       const response = await axios.get(
-        `http://192.168.102.13:8080/api/admin/auth/generate-qr/${format}/${id}`,
+        `${apiConfig.apiBaseUrl}auth/generate-qr/${format}/${id}`,
         {
           responseType: "arraybuffer",
         }
@@ -35,7 +35,7 @@ const ReportGeneratorModal = ({ open, onClose, id }) => {
   // Hàm gọi API để mở báo cáo PDF
   const viewReport = () => {
     window.open(
-      `http://192.168.102.13:8080/api/admin/auth/view-report?id=${id}&format=${format}`,
+      `${apiConfig.apiBaseUrl}auth/view-report?id=${id}&format=${format}`,
       "_blank"
     );
   };

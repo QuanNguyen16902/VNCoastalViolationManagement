@@ -2,16 +2,20 @@
 import axios from "axios";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import authHeader from "../../../service/auth-header";
-
+import apiConfig from "../../../utils/config";
 const ConfigContext = createContext();
 
 export const ConfigProvider = ({ children }) => {
   const [config, setConfig] = useState({
+    siteName: "",
+    subSiteName: "",
+    footerText: "",
+    logoUrl: "",
+    websiteDescription: "",
+
     tokenExpiry: "",
     tokenSecret: "",
 
-    // UI Settings
-    theme: "",
     // Mail Settings
     mailHost: "",
     mailPort: "",
@@ -19,12 +23,14 @@ export const ConfigProvider = ({ children }) => {
     mailPassword: "",
     smtpAuth: "",
     smtpStartTls: "",
+    mailViolationConfirmSubject: "",
+    mailViolationConfirmContent: "",
   });
   // Hàm để tải cấu hình từ server
   const loadConfig = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8080/api/admin/settings/jwt-config",
+        `${apiConfig.apiBaseUrl}settings/jwt-config`,
         { headers: authHeader() }
       );
       setConfig(response.data);

@@ -172,7 +172,8 @@ public class DecisionController {
         helper.setTo(toAddress);
         helper.setSubject(subject);
 
-        SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm:ss E, dd/MM/yyyy");
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm:ss EEEE, dd/MM/yyyy", new Locale("vi", "VN"));
+
         String penaltyDecisionTime = dateFormatter.format(penaltyDecision.getHieuLucThiHanh());
         String pattern = "###,###,###.##";
         DecimalFormat decimalFormat = new DecimalFormat(pattern);
@@ -192,6 +193,7 @@ public class DecisionController {
         content = content.replace("[[hieuLucThiHanh]]",penaltyDecisionTime);
         content = content.replace("[[tenNguoiThiHanh]]", penaltyDecision.getNguoiThiHanh().getProfile().getFullName());
         content = content.replace("[[decisionId]]", String.valueOf(penaltyDecision.getId()));
+        content = content.replace("[[bienBanId]]", String.valueOf(penaltyDecision.getBienBanViPham().getId()));
 
         helper.setText(content, true);
         mailSender.send(message);
@@ -213,23 +215,30 @@ public class DecisionController {
             throw new RuntimeException("Could not generate QR Code", e);
         }
     }
+    @GetMapping("/auth/generate-qr/{format}/{id}")
+    public void generateQR(@PathVariable String format, @PathVariable Long id){
+        String pdfLink = "http://192.168.9.183:8080/api/admin/auth/view-report?id=" + id + "&format=" + format;
+
+        // Chuyển QR Code thành Image và lưu vào tham số
+        BufferedImage qrCodeImage = generateQRCodeImage(pdfLink); // Create this method
+        // Convert BufferedImage to Image for JasperReports
+        Image qrCodeJasperImage = qrCodeImage;
+        return ;
+    }
     @GetMapping("/auth/view-report")
     public void viewReport(@RequestParam Long id, @RequestParam String format, HttpServletResponse response) {
         try {
             // Tạo báo cáo Jasper
             JasperReport jasperReport = JasperCompileManager.compileReport(ResourceUtils.getFile("classpath:quyetDinhXuPhat.jrxml").getAbsolutePath());
-//            String pdfLink = "http://192.168.102.13:8080/api/admin/auth/view-report?id=" + id + "&format=" + format;
-            String pdfLink = "http://192.168.102.13:8082/api/tutorials";
+            String pdfLink = "http://192.168.9.183:8080/api/admin/auth/view-report?id=" + id + "&format=" + format;
 
             // Chuyển QR Code thành Image và lưu vào tham số
             BufferedImage qrCodeImage = generateQRCodeImage(pdfLink); // Create this method
-
             // Convert BufferedImage to Image for JasperReports
             Image qrCodeJasperImage = qrCodeImage;
 
 //            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 //            ImageIO.write(qrImage, "png", outputStream);
-
 
             // Truyền tham số nếu cần thiết, có thể sử dụng ID ở đây
             PenaltyDecision item = decisionService.getById(id);
@@ -239,28 +248,37 @@ public class DecisionController {
             // Tạo nguồn dữ liệu cho báo cáo từ danh sách đối tượng
             JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(singleItemList);
 
-            parameters.put("qrcode", qrCodeJasperImage);
             ViolationPerson nguoiViPham = item.getBienBanViPham().getNguoiViPham();
-            parameters.put("thoiGianLap", item.getBienBanViPham().getThoiGianLap());
+            parameters.put("thoiGianLap", item.getThoiGianLap());
             parameters.put("tenNguoiViPham", nguoiViPham.getNguoiViPham());
-            parameters.put("ngheNghiep", item.getBienBanViPham().getNguoiViPham().getNgheNghiep());
             parameters.put("quocTich", nguoiViPham.getQuocTich());
             parameters.put("namSinh", nguoiViPham.getNamSinh());
             parameters.put("diaChi", nguoiViPham.getDiaChi());
             parameters.put("CMND", nguoiViPham.getCanCuoc());
             parameters.put("ngayCap", nguoiViPham.getNgayCap());
             parameters.put("noiCap", nguoiViPham.getNoiCap());
-            parameters.put("hanhVi", item.getBienBanViPham().getHanhVi());
+            parameters.put("ngheNghiep", nguoiViPham.getNgheNghiep());
 
+            parameters.put("hanhVi", item.getBienBanViPham().getHanhVi());
+            parameters.put("thoiGianLapBienBan", item.getBienBanViPham().getThoiGianLap());
+            parameters.put("nguoiLap", item.getBienBanViPham().getNguoiLap());
+            parameters.put("soBienBanViPham", item.getBienBanViPham().getSoVanBan());
+            parameters.put("viPhamDieuKhoan", item.getBienBanViPham().getViPhamDieuKhoan());
+
+
+            parameters.put("thanhPho", item.getThanhPho());
             parameters.put("xuPhatChinh", item.getXuPhatChinh());
             parameters.put("xuPhatBoSung", item.getXuPhatBoSung());
             parameters.put("mucPhat", item.getMucPhat());
             parameters.put("bienPhapKhacPhuc", item.getBienPhapKhacPhuc());
-            parameters.put("viPhamDieuKhoan", item.getBienBanViPham().getViPhamDieuKhoan());
             parameters.put("hieuLucThiHanh", item.getHieuLucThiHanh());
             parameters.put("diaChiKhoBac", item.getDiaChiKhoBac());
             parameters.put("tenNguoiThiHanh", item.getNguoiThiHanh().getProfile().getFullName());
-
+            parameters.put("capBac", item.getNguoiThiHanh().getProfile().getRank());
+            parameters.put("chucVu", item.getNguoiThiHanh().getProfile().getPosition());
+            parameters.put("donVi", item.getNguoiThiHanh().getProfile().getDepartment());
+            parameters.put("nghiDinh", item.getNghiDinh());
+            parameters.put("qrcode", qrCodeJasperImage);
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
 
             // Thiết lập header để mở file PDF trực tiếp

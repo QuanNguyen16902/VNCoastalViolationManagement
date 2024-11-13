@@ -26,10 +26,12 @@ public class UserDetailsImpl implements UserDetails {
 
     private Collection<? extends GrantedAuthority> roles;
     private Collection<? extends GrantedAuthority> permissions;
+    private Collection<? extends GrantedAuthority> rolesOfGroup;
 
     public UserDetailsImpl(Long id, String username, String email, String password, boolean enabled,
                            Collection<? extends GrantedAuthority> roles,
-                           Collection<? extends GrantedAuthority> permissions) {
+                           Collection<? extends GrantedAuthority> permissions,
+                           Collection<? extends GrantedAuthority> rolesOfGroup) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -37,6 +39,7 @@ public class UserDetailsImpl implements UserDetails {
         this.enabled = enabled;
         this.roles = roles;
         this.permissions = permissions;
+        this.rolesOfGroup = rolesOfGroup;
     }
 
     public static UserDetailsImpl build(User user) {
@@ -44,6 +47,7 @@ public class UserDetailsImpl implements UserDetails {
         // Tách roles và permissions thành hai danh sách riêng biệt
         Set<GrantedAuthority> roles = new HashSet<>();
         Set<GrantedAuthority> permissions = new HashSet<>();
+        Set<GrantedAuthority> rolesOfGroup = new HashSet<>();
 
         // Thêm roles của người dùng vào danh sách roles
         for (Role role : user.getRoles()) {
@@ -55,6 +59,21 @@ public class UserDetailsImpl implements UserDetails {
             }
         }
 
+        // Lấy quyền từ các nhóm người dùng tham gia và thêm vào quyền của người dùng
+        user.getGroups().forEach(group -> {
+            rolesOfGroup.addAll(group.getRoles().stream()
+                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
+                    .collect(Collectors.toSet()));
+
+            // Lấy quyền từ các vai trò trong nhóm và thêm vào permissions
+            group.getRoles().forEach(groupRole -> {
+                groupRole.getPermissions().forEach(permission -> {
+                    permissions.add(new SimpleGrantedAuthority(permission.getName()));
+                });
+            });
+        });
+
+        // Trả về UserDetailsImpl với các quyền từ roles, permissions và roles của nhóm
         return new UserDetailsImpl(
                 user.getId(),
                 user.getUsername(),
@@ -62,9 +81,11 @@ public class UserDetailsImpl implements UserDetails {
                 user.getPassword(),
                 user.isEnabled(),
                 roles,        // Roles được tách riêng
-                permissions   // Permissions được tách riêng
+                permissions,  // Permissions được tách riêng
+                rolesOfGroup  // Roles từ nhóm
         );
     }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -72,6 +93,7 @@ public class UserDetailsImpl implements UserDetails {
         Set<GrantedAuthority> combinedAuthorities = new HashSet<>();
         combinedAuthorities.addAll(roles);
         combinedAuthorities.addAll(permissions);
+        combinedAuthorities.addAll(rolesOfGroup);
         // Trả về roles và permissions trong cùng một tập hợp
         return combinedAuthorities;
     }
@@ -82,6 +104,9 @@ public class UserDetailsImpl implements UserDetails {
     // Trả về permissions riêng biệt
     public Collection<? extends GrantedAuthority> getPermissions() {
         return permissions;
+    }
+    public Collection<? extends GrantedAuthority> getRolesOfGroup() {
+        return rolesOfGroup;
     }
 
     public Long getId() {

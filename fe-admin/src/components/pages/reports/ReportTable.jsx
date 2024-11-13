@@ -16,7 +16,7 @@ import React, { useEffect, useState } from "react";
 import { Alert, Col, Row, Spinner, Table } from "react-bootstrap";
 import { Bar } from "react-chartjs-2";
 import authHeader from "../../../service/auth-header";
-
+import apiConfig from "../../../utils/config";
 // Đăng ký các thành phần cần thiết của Chart.js
 ChartJS.register(
   CategoryScale,
@@ -40,9 +40,9 @@ const ReportTable = () => {
     setLoading(true);
     setError(null);
     try {
-      let url = `http://localhost:8080/api/admin/reports/by_date/${selectedPeriod}`;
+      let url = `${apiConfig}reports/by_date/${selectedPeriod}`;
       if (selectedPeriod === "date_range" && start && end) {
-        url = `http://localhost:8080/api/admin/reports/by_date_range?startDate=${start}&endDate=${end}`;
+        url = `${apiConfig}reports/by_date_range?startDate=${start}&endDate=${end}`;
       }
       const response = await axios.get(url, { headers: authHeader() });
       setReportData(response.data);

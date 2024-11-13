@@ -15,8 +15,8 @@ import { Field, Form, Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
-import diaphuongData from "../../../data/diaphuong.json";
-import violationPersonService from "../../../service/violation-person.service";
+import diaphuongData from "../../../../data/diaphuong.json";
+import violationPersonService from "../../../../service/violation-info.service";
 // Schema xác thực
 const validationSchema = Yup.object({
   nguoiViPham: Yup.string().required("Tên người vi phạm là bắt buộc"),

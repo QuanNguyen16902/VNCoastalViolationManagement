@@ -9,6 +9,9 @@ import "./loading.css";
 import "./loginPage.css";
 
 function LoginPage() {
+  const controller = new AbortController();
+  const signal = controller.signal;
+
   const [isRegister, setIsRegister] = useState(false);
   const [fadeEffect, setFadeEffect] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -54,16 +57,21 @@ function LoginPage() {
             setIsLoading(false); // Turn off loading
             toast.success("Đăng nhập thành công");
             navigate("/");
-          }, 1500);
+          }, 1000);
         } else {
           toast.error(result.message);
           setIsLoading(false);
         }
       }
     } catch (error) {
-      const errorMessage =
-        error.response?.data || "Có lỗi xảy ra 132 từ server!";
-      toast.error(errorMessage);
+      if (error.code === "ECONNABORTED") {
+        toast.error(
+          "Thời gian kết nối đã vượt quá giới hạn, vui lòng thử lại."
+        );
+      } else {
+        const errorMessage = error.response?.data || "Có lỗi xảy ra từ server!";
+        toast.error(error.response.data.message);
+      }
       setIsLoading(false);
     }
   };
@@ -112,23 +120,6 @@ function LoginPage() {
               {isRegister ? "Đăng nhập" : "Đăng ký"}
             </a>
           </p>
-          {/* {!isRegister && (
-            <div className="text-center mt-0">
-              <p>Đăng nhập bằng: </p>
-              <div
-                className="d-flex justify-content-between mx-auto"
-                style={{ width: "40%" }}
-              >
-                <Button style={{ color: "#1266f1" }}>
-                  <i className="bi bi-facebook" size="sm" />
-                </Button>
-
-                <Button style={{ color: "#EB3535" }}>
-                  <i className="bi bi-google" size="sm" />
-                </Button>
-              </div>
-            </div>
-          )} */}
 
           <div className="support-info">
             <h5 className="fw-bold">Thông tin hỗ trợ:</h5>

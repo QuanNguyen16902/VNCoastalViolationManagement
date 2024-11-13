@@ -32,6 +32,7 @@ function ViewViolationModal({ open, onClose, onViewViolation, violationId }) {
 
   const [violation, setViolation] = useState(null);
   const [nguoiViPham, setNguoiViPham] = useState(null);
+  const [seizedItems, setSeizedItems] = useState([]);
 
   useEffect(() => {
     let isMounted = true; // Khai báo biến cờ
@@ -42,7 +43,9 @@ function ViewViolationModal({ open, onClose, onViewViolation, violationId }) {
           if (isMounted) {
             setViolation(response.data);
             setNguoiViPham(response.data.nguoiViPham);
+            setSeizedItems(response.data.seizedItems);
             console.log(response.data);
+            console.log(response.data.seizedItems);
           }
         } catch (error) {
           if (isMounted) {
@@ -132,7 +135,30 @@ function ViewViolationModal({ open, onClose, onViewViolation, violationId }) {
           </TabPanel>
 
           {/* UI Settings */}
-          <TabPanel value="3">Tang vật</TabPanel>
+          <TabPanel value="3">
+            <table className="table table-bordered table-hover table-responsive">
+              <thead className="table-light text-center">
+                <tr>
+                  <th>Tên tang vật</th>
+                  <th>Mô tả</th>
+                  <th>Số lượng</th>
+                  <th>Ngày thu giữ</th>
+                  <th>Tình trạng</th>
+                </tr>
+              </thead>
+              <tbody>
+                {seizedItems.map((row) => (
+                  <tr key={row.id}>
+                    <td>{row.itemName}</td>
+                    <td>{row.description}</td>
+                    <td>{row.quantity}</td>
+                    <td>{formatDate(row.seizureDate)}</td>
+                    <td>{row.status}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </TabPanel>
         </TabContext>
       </DialogContent>
       <DialogActions>

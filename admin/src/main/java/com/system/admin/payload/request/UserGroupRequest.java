@@ -12,6 +12,5 @@ import java.util.List;
 public class UserGroupRequest {
     private String name;
     private String description;
-    private List<Long> userIds;
     private List<Long> roleIds;
 }

@@ -23,6 +23,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> findByEnabled(boolean enabled, Pageable pageable);
     Page<User> findByUsernameContaining(String username, Pageable pageable);
 
+    @Query("SELECT u FROM User u LEFT JOIN u.roles r WHERE r IS NULL")
+    List<User> getUsersWithoutRoles();
+
     @Query("SELECT u FROM User u WHERE LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<User> findByEmailContainingIgnoreCase(String keyword, Pageable pageable);
 
@@ -31,6 +34,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u JOIN u.roles r WHERE u.username LIKE %:keyword% " +
             "OR u.email LIKE %:keyword% " +
+            "OR u.profile.fullName LIKE %:keyword% " +
             "OR CAST(u.enabled AS string) LIKE %:keyword% " +
             "OR r.name LIKE %:keyword%")
     List<User> searchUsers(@Param("keyword") String keyword);

@@ -1,18 +1,25 @@
 package com.system.admin.controller.ViolationController;
 
+import com.system.admin.model.PenaltyDecision;
 import com.system.admin.model.SeizedItem;
 import com.system.admin.model.ViolationRecord.ViolationPerson;
 import com.system.admin.model.ViolationRecord.ViolationRecord;
 import com.system.admin.service.ViolationService.ViolationService;
+import jakarta.servlet.http.HttpServletResponse;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.util.*;
 import java.util.List;
 
 @CrossOrigin(origins = "*")
@@ -118,32 +125,68 @@ public class ViolationController {
         List<SeizedItem> seizedItems = violationService.getSeizedItemByViolationId(id);
         return ResponseEntity.ok(seizedItems);
     }
+    @GetMapping("/auth/violations/view-report")
+    public void viewReport(@RequestParam Long id, @RequestParam String format, HttpServletResponse response) {
+        try {
+            // Tạo báo cáo Jasper
+            JasperReport jasperReport = JasperCompileManager.compileReport(ResourceUtils.getFile("classpath:bienBanViPham.jrxml").getAbsolutePath());
+            // Truyền tham số nếu cần thiết, có thể sử dụng ID ở đây
+            ViolationRecord item = violationService.getById(id);
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("id", id);
+            List<ViolationRecord> singleItemList = Collections.singletonList(item);
+            // Tạo nguồn dữ liệu cho báo cáo từ danh sách đối tượng
+            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(singleItemList);
 
-//    @GetMapping("/violations/generate-templates")
-//    public ResponseEntity<byte[]> generateReport() throws Exception {
-//        try {
-//            // Chuẩn bị dữ liệu mẫu (replace with actual data fetching logic)
-//            ViolationRecord reportData = new ViolationRecord(); // Fetch or populate data as needed
-//
-//            // Call the service to generate the report
-//            byte[] report = violationService.generateTemplate(reportData);
-//
-//            // Create HTTP headers to return the PDF file
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.setContentType(MediaType.APPLICATION_PDF);
-//            headers.setContentDispositionFormData("attachment", "violation_report.pdf");
-//
-//            // Return the PDF file in the response
-//            return ResponseEntity.ok()
-//                    .headers(headers)
-//                    .body(report);
-//        } catch (Exception e) {
-//            // Log the error and return an internal server error response
-//            e.printStackTrace();
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(null);
-//        }
-//    }
+            parameters.put("tenNguoiViPham", item.getNguoiViPham().getNguoiViPham());
+            parameters.put("ngheNghiep", item.getNguoiViPham().getNgheNghiep());
+            parameters.put("namSinh", item.getNguoiViPham().getNamSinh());
+            parameters.put("diaChi", item.getNguoiViPham().getDiaChi());
+            parameters.put("CMND", item.getNguoiViPham().getCanCuoc());
+            parameters.put("ngayCap", item.getNguoiViPham().getNgayCap());
+            parameters.put("noiCap", item.getNguoiViPham().getNoiCap());
+            parameters.put("hanhVi", item.getHanhVi());
+            parameters.put("quocTich", item.getNguoiViPham().getQuocTich());
+//        parameters.put("tenCoQuan", item.getTenCoQuan());
+//        parameters.put("soVanBan", item.getSoVanBan());
+//        parameters.put("thoiGianLap", item.getThoiGianLap());
+//        parameters.put("nguoiLap", item.getNguoiLap());
+//        parameters.put("nguoiChungKien", item.getNguoiChungKien());
+            parameters.put("nguoiThietHai", item.getNguoiThietHai());
+
+            parameters.put("thoiGianViPham", item.getTauViPham().getThoiGianViPham());
+            parameters.put("diaDiem", item.getTauViPham().getDiaDiem());
+            parameters.put("tongDungTich", item.getTauViPham().getTongDungTich());
+            parameters.put("soHieuTau", item.getTauViPham().getSoHieuTau());
+            parameters.put("congSuat", item.getTauViPham().getCongSuat());
+            parameters.put("haiTrinhCapPhep", item.getTauViPham().getHaiTrinhCapPhep());
+            parameters.put("toaDoX", item.getTauViPham().getToaDoX());
+            parameters.put("toaDoY", item.getTauViPham().getToaDoY());
+            parameters.put("haiTrinhThucTe", item.getTauViPham().getHaiTrinhThucTe());
+
+            parameters.put("viPhamDieuKhoan", item.getViPhamDieuKhoan());
+            parameters.put("yKienNguoiViPham", item.getYKienNguoiDaiDien());
+            parameters.put("yKienNguoiChungKien", item.getYKienNguoiChungKien());
+            parameters.put("yKienNguoiThietHai", item.getYKienNguoiThietHai());
+            parameters.put("bienPhapNganChan", item.getBienPhapNganChan());
+            parameters.put("tamGiu", item.getTamGiu());
+            parameters.put("yeuCau", item.getYeuCau());
+            parameters.put("soBan", item.getSoBan());
+            parameters.put("thoiGianGiaiQuyet", item.getThoiGianGiaiQuyet());
+
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
+
+            // Thiết lập header để mở file PDF trực tiếp
+            response.setContentType("application/pdf");
+            response.setHeader("Content-Disposition", "inline;  filename=\"report." + format + "\"");
+
+            // Xuất PDF ra response output stream
+            JasperExportManager.exportReportToPdfStream(jasperPrint, response.getOutputStream());
+            response.getOutputStream().flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 }
 

@@ -11,15 +11,18 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useUserRoles } from "../../../hooks/useUserRoles";
 import userGroupService from "../../../service/user-group.service";
+import AccessDenied from "../../layout/Error/AccessDenied";
 import "../datatable.css";
 import SearchField from "../SearchField";
 import AddUserGroupModal from "./AddUserGroupModal";
 import EditUserGroupDialog from "./EditUserGroupModal";
 import "./userGroup.css";
+import UsersOfGroupModal from "./UsersOfGroup";
 
 function UsersGroup() {
-  const roles = useUserRoles();
-  const canView = roles.includes("ROLE_ADMIN");
+  const { userRoles, groupRoles } = useUserRoles();
+  // Kiểm tra nếu "ROLE_ADMIN" có trong cả userRoles và groupRoles
+  const canView = [...userRoles, ...groupRoles].includes("ROLE_ADMIN");
 
   const [data, setData] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -28,6 +31,9 @@ function UsersGroup() {
   const [deleteId, setDeleteId] = useState(null);
   const [openEdit, setOpenEdit] = useState(false);
   const [editUserGroupId, setEditUserGroupId] = useState(null);
+  const [openUserOfGroup, setOpenUserOfGroup] = useState(false);
+  const [userOfGroupId, setUserOfGroupId] = useState(null);
+
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -87,12 +93,18 @@ function UsersGroup() {
   const handleClose = () => {
     setOpenDelete(false);
     setOpenEdit(false);
+    setOpenUserOfGroup(false);
   };
 
   // Handle edit user
   const handleEditUserGroup = (userGroupId) => {
     setEditUserGroupId(userGroupId);
     setOpenEdit(true);
+  };
+  // Handle view users of group
+  const handleUsersOfGroup = (userGroupId) => {
+    setUserOfGroupId(userGroupId);
+    setOpenUserOfGroup(true);
   };
 
   // Handle search
@@ -114,9 +126,9 @@ function UsersGroup() {
   );
 
   const columns = [
-    { field: "id", headerName: "ID", width: 40 },
-    { field: "name", headerName: "Name", width: 140 },
-    { field: "description", headerName: "Description", width: 330 },
+    { field: "id", headerName: "ID", width: 80 },
+    { field: "name", headerName: "Tên nhóm", width: 180 },
+    { field: "description", headerName: "Mô tả", width: 380 },
   ];
 
   const actionColumn = [
@@ -129,7 +141,7 @@ function UsersGroup() {
           <div
             className="addUserButton"
             title="Thêm người dùng"
-            onClick={() => handleAddUserToGroup(params.row.id)} // Pass the user group ID
+            onClick={() => handleUsersOfGroup(params.row.id)} // Pass the user group ID
           >
             <i className="bi bi-person-plus-fill"></i>
           </div>
@@ -174,25 +186,7 @@ function UsersGroup() {
   }
 
   if (!canView) {
-    return (
-      <div className="d-flex justify-content-center align-items-center">
-        <div
-          className="text-center p-4"
-          style={{
-            borderRadius: "10px",
-            backgroundColor: "#e7f3fe",
-            border: "2px solid #007bff",
-            maxWidth: "500px",
-          }}
-        >
-          <i
-            className="bi bi-exclamation-octagon fw-bold text-primary"
-            style={{ fontSize: "48px" }}
-          ></i>
-          <h4 className="mt-3">Bạn không có quyền xem danh sách người dùng</h4>
-        </div>
-      </div>
-    );
+    return <AccessDenied />;
   }
 
   return (
@@ -216,13 +210,12 @@ function UsersGroup() {
         className="datagrid"
         rows={rows}
         columns={columns.concat(actionColumn)}
-        checkboxSelection
-        onSelectionModelChange={(ids) => setSelectedRows(ids)}
         initialState={{
           pagination: {
             paginationModel: { page: 0, pageSize: 10 },
           },
         }}
+        disableRowSelectionOnClick
         pageSizeOptions={[10]}
       />
       <Dialog
@@ -250,6 +243,14 @@ function UsersGroup() {
           onClose={handleClose}
           userGroupId={editUserGroupId}
           onEditUserGroup={() => fetchUsersGroup()} // Refetch usersGroup after editing
+        />
+      )}
+      {openUserOfGroup && (
+        <UsersOfGroupModal
+          open={openUserOfGroup}
+          onClose={handleClose}
+          userGroupId={userOfGroupId}
+          // onEditUserGroup={() => fetchUsersGroup()} // Refetch usersGroup after editing
         />
       )}
     </div>

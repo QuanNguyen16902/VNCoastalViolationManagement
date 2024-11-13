@@ -1,8 +1,8 @@
 import axios from "axios";
 import authHeader from "./auth-header";
 
-const API_URL = "http://localhost:8080/api/admin/";
-
+import apiConfig from "../utils/config";
+const API_URL = apiConfig.apiBaseUrl;
 class UserService {
   getUsersGroup() {
     return axios.get(API_URL + "users-group", { headers: authHeader() });
@@ -12,16 +12,19 @@ class UserService {
       headers: authHeader(),
     });
   }
-  addUserToGroup(groupId, userId) {
-    return axios.post(API_URL + `users-group/${groupId}/add-user/${userId}`, {
-      headers: authHeader(),
-    });
+
+  addListUserToGroup(groupId, userIds) {
+    return axios.post(
+      API_URL + `users-group/${groupId}/add-users`,
+      {
+        userIds,
+      },
+      {
+        headers: authHeader(),
+      }
+    );
   }
-  addRoleToGroup(groupId, roleId) {
-    return axios.post(API_URL + `users-group/${groupId}/add-role/${roleId}`, {
-      headers: authHeader(),
-    });
-  }
+
   addGroup(groupData) {
     return axios.post(API_URL + "users-group", groupData, {
       headers: authHeader(),

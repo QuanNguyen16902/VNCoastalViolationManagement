@@ -7,9 +7,9 @@ import * as React from "react";
 import { ConfigProvider } from "./ConfigProvider";
 import GeneralSettings from "./GeneralSetting";
 import MailSettings from "./MailSetting";
+import MailTemplate from "./MailTemplateForm";
 import SaveButton from "./SaveButton";
 import SecuritySettings from "./SecuritySetting";
-import UISettings from "./UISetting";
 
 export default function Settings() {
   const [value, setValue] = React.useState("1");
@@ -33,11 +33,12 @@ export default function Settings() {
       >
         <TabContext value={value}>
           <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
-            <TabList onChange={handleChange} aria-label="lab API tabs example">
+            <TabList onChange={handleChange} aria-label="settings tabs">
               <Tab label="General" value="1" />
               <Tab label="Security Setting" value="2" />
-              <Tab label="UI Settings" value="3" />
-              <Tab label="Mail Settings" value="4" />
+              <Tab label="Mail Settings" value="3" />
+              <Tab label="Mail Template" value="4" />{" "}
+              {/* New Tab for Mail Template */}
             </TabList>
           </Box>
 
@@ -51,12 +52,14 @@ export default function Settings() {
             <SecuritySettings />
           </TabPanel>
 
-          {/* UI Settings */}
+          {/* Mail Settings */}
           <TabPanel value="3">
-            <UISettings />
-          </TabPanel>
-          <TabPanel value="4">
             <MailSettings />
+          </TabPanel>
+
+          {/* Mail Template */}
+          <TabPanel value="4">
+            <MailTemplate /> {/* New TabPanel content for Mail Template */}
           </TabPanel>
         </TabContext>
 

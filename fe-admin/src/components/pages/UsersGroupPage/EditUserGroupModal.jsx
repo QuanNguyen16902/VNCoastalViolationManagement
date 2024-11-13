@@ -17,7 +17,6 @@ import { toast } from "react-toastify";
 import * as Yup from "yup";
 import roleService from "../../../service/role.service";
 import userGroupService from "../../../service/user-group.service";
-import userService from "../../../service/user.service";
 
 const validationSchema = Yup.object({
   name: Yup.string().required("Tên bắt buộc"),
@@ -27,7 +26,6 @@ const validationSchema = Yup.object({
 function EditUserGroupDialog({ open, onClose, onEditUserGroup, userGroupId }) {
   const [userGroup, setUserGroup] = useState(null);
   const [roles, setRoles] = useState([]);
-  const [users, setUsers] = useState([]);
   // Truy xuat roles
   useEffect(() => {
     const fetchRoles = async () => {
@@ -40,33 +38,6 @@ function EditUserGroupDialog({ open, onClose, onEditUserGroup, userGroupId }) {
     };
     fetchRoles();
   }, []);
-  // Truy xuat nguoi dung chua co Role
-
-  useEffect(() => {
-    const fetchUsersWithoutRolesAndInGroup = async () => {
-      try {
-        const response = await userService.getUsers();
-        const groupResponse = await userGroupService.getGroup(userGroupId); // Gọi API để lấy nhóm và danh sách users của nhóm
-
-        // Lấy danh sách người dùng từ nhóm
-        const groupUsers = groupResponse.data.users || [];
-
-        // Lọc chỉ những người dùng đã có trong nhóm hoặc chưa có quyền
-        const usersInGroupOrWithoutRoles = response.data.filter(
-          (user) =>
-            !user.roles ||
-            user.roles.length === 0 ||
-            groupUsers.some((groupUser) => groupUser.id === user.id) // Kiểm tra nếu người dùng thuộc nhóm đã cho
-        );
-
-        setUsers(usersInGroupOrWithoutRoles);
-      } catch (error) {
-        console.error("Failed to fetch users", error);
-      }
-    };
-
-    fetchUsersWithoutRolesAndInGroup();
-  }, [userGroupId]);
 
   useEffect(() => {
     if (userGroupId) {
@@ -89,10 +60,6 @@ function EditUserGroupDialog({ open, onClose, onEditUserGroup, userGroupId }) {
     try {
       const userGroupData = {
         ...values,
-        // Đổi thành userIds và roleIds cho đúng cấu trúc API
-        userIds: users
-          .filter((user) => values.users.includes(user.id))
-          .map((user) => user.id),
         roleIds: roles
           .filter((role) => values.roles.includes(role.id))
           .map((role) => role.id),
@@ -100,11 +67,7 @@ function EditUserGroupDialog({ open, onClose, onEditUserGroup, userGroupId }) {
 
       // Gọi API cập nhật nhóm người dùng
       await userGroupService.editGroup(userGroupId, userGroupData);
-      const rolesAssignData = {
-        userIds: values.users,
-        roleIds: values.roles,
-      };
-      await userService.assignRolesToUsers(rolesAssignData);
+
       // Thông báo thành công
       toast.success("Nhóm dùng đã được cập nhật thành công!");
       onEditUserGroup();
@@ -196,37 +159,6 @@ function EditUserGroupDialog({ open, onClose, onEditUserGroup, userGroupId }) {
                       <MenuItem key={role.id} value={role.id}>
                         <Checkbox checked={values.roles.includes(role.id)} />
                         {role.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <FormControl fullWidth margin="normal" variant="outlined">
-                  <InputLabel id="user-label">Chọn người dùng</InputLabel>
-                  <Select
-                    label="Chọn người dùng"
-                    multiple
-                    value={values.users}
-                    onChange={(event) =>
-                      setFieldValue("users", event.target.value)
-                    }
-                    renderValue={(selected) =>
-                      selected
-                        .map(
-                          (id) => users.find((user) => user.id === id)?.username
-                        )
-                        .join(", ")
-                    }
-                    MenuProps={{
-                      PaperProps: {
-                        style: { maxHeight: 200 },
-                      },
-                    }}
-                  >
-                    {users.map((user) => (
-                      <MenuItem key={user.id} value={user.id}>
-                        <Checkbox checked={values.users.includes(user.id)} />
-                        {user.username}
                       </MenuItem>
                     ))}
                   </Select>

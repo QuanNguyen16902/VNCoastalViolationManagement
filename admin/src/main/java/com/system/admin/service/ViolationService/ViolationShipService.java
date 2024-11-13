@@ -31,10 +31,7 @@ public class ViolationShipService {
         // Check nếu số căn cước đã tồn tại
         Optional<ViolationShip> existingPersonWithSameSoHieuTau =
                 violationShipRepo.findBySoHieuTauAndIdNot(violationShip.getSoHieuTau(), id);
-
-        if (existingPersonWithSameSoHieuTau.isPresent()) {
-            throw new IllegalArgumentException("Số hiệu tàu đã tồn tại.");
-        }
+ 
         // Update details if unique constraint is satisfied
         existViolationShip.setCongSuat(violationShip.getCongSuat());
         existViolationShip.setDiaDiem(violationShip.getDiaDiem());

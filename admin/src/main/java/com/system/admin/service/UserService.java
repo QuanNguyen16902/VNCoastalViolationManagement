@@ -44,6 +44,9 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    public List<User> getUsersWithoutRoles() {
+        return userRepository.getUsersWithoutRoles();
+    }
 
     public boolean existsByUsername(String username){
         return userRepository.existsByUsername(username);
@@ -53,14 +56,6 @@ public class UserService {
     }
     public List<User> getAll(){
         return userRepository.findAll();
-    }
-    // Method to get all users with pagination
-    public Page<User> getAllUsers(Pageable pageable) {
-        return userRepository.findAll(pageable);
-    }
-
-    public Page<User> searchUsers(String keyword, Pageable pageable) {
-        return userRepository.findByEmailContainingIgnoreCase(keyword, pageable);
     }
 
     public List<User> searchUsers(String keyword) {

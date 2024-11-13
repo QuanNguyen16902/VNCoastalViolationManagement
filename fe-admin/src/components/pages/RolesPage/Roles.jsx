@@ -14,6 +14,7 @@ import {
   default as RoleService,
   default as roleService,
 } from "../../../service/role.service";
+import AccessDenied from "../../layout/Error/AccessDenied";
 import "../datatable.css";
 import SearchField from "../SearchField";
 import AddRoleModal from "./AddRoleModal";
@@ -29,8 +30,10 @@ function Roles() {
   const [editRoleId, setEditRoleId] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(true);
-  const roles = useUserRoles();
-  const canView = roles.includes("ROLE_ADMIN");
+
+  const { userRoles, groupRoles } = useUserRoles();
+  // Kiểm tra nếu "ROLE_ADMIN" có trong cả userRoles và groupRoles
+  const canView = [...userRoles, ...groupRoles].includes("ROLE_ADMIN");
 
   // Fetch users with optional search keyword
   const fetchRoles = async (keyword = "") => {
@@ -157,30 +160,12 @@ function Roles() {
     );
   }
   if (!canView) {
-    return (
-      <div className="d-flex justify-content-center align-items-center">
-        <div
-          className="text-center p-4"
-          style={{
-            borderRadius: "10px",
-            backgroundColor: "#e7f3fe",
-            border: "2px solid #007bff",
-            maxWidth: "500px",
-          }}
-        >
-          <i
-            className="bi bi-exclamation-octagon fw-bold text-primary"
-            style={{ fontSize: "48px" }}
-          ></i>
-          <h4 className="mt-3">Bạn không có quyền xem danh sách vai trò</h4>
-        </div>
-      </div>
-    );
+    return <AccessDenied />;
   }
   return (
     <div className="datatable">
       <div className="datatableTitle">
-        Danh sách Quyền
+        Danh sách Vai trò
         <SearchField label={"Tra cứu Quyền"} onSearch={handleSearch} />
         <button className="link" onClick={() => setOpenAdd(true)}>
           <i className="bi bi-person-add hover"></i>&nbsp;
@@ -202,11 +187,10 @@ function Roles() {
           },
         }}
         pageSizeOptions={[5]}
-        checkboxSelection
         onSelectionModelChange={(ids) => {
           setSelectedRows(ids);
         }}
-        disableSelectionOnClick
+        disableRowSelectionOnClick
       />
 
       <Dialog

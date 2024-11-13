@@ -1,16 +1,16 @@
 import React from "react";
+import { useConfig } from "../../../pages/SettingPage/ConfigProvider";
 import "./footer.css";
 export default function Footer() {
+  const { config } = useConfig();
+
   return (
-    <div>
-      <footer
-        id="footer"
-        className="footer fixed-bottom d-flex align-items-center"
-        style={{ backgroundColor: "#E4EBF3" }}
-      >
-        &copy; {new Date().getFullYear()} QuanNguyen.
-        {/* All rights reserved. */}
-      </footer>
-    </div>
+    <footer
+      id="footer"
+      className="footer fixed-bottom d-flex align-items-center"
+      style={{ backgroundColor: "#E4EBF3" }}
+    >
+      {config.footerText} &copy; {new Date().getFullYear()}
+    </footer>
   );
 }

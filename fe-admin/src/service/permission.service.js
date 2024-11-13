@@ -1,7 +1,7 @@
 import axios from "axios";
+import apiConfig from "../utils/config";
 import authHeader from "./auth-header";
-
-const API_URL = "http://localhost:8080/api/admin/";
+const API_URL = apiConfig.apiBaseUrl;
 
 class RoleService {
   getListPermissions() {

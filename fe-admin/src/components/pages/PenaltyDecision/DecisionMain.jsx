@@ -10,8 +10,10 @@ import PaymentModal from "./Payment/PaymentModal";
 import ReportGeneratorModal from "./QRCodeGenerator";
 
 export default function DecisionMain() {
-  const roles = useUserRoles();
-  const canView = roles.includes("ROLE_ADMIN");
+  const { userRoles, groupRoles } = useUserRoles();
+  // Kiểm tra nếu "ROLE_ADMIN" có trong cả userRoles và groupRoles
+  const canView = [...userRoles, ...groupRoles].includes("ROLE_ADMIN");
+
   const [openDialogSearch, setOpenSearch] = useState(false);
   const handleOpenSearchModal = () => {
     setOpenSearch(true);
@@ -42,9 +44,13 @@ export default function DecisionMain() {
   const [totalPages, setTotalPages] = useState(0); // Tổng số trang
   const [loading, setLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
+  const [isSendMail, setIsSendMail] = useState(false);
   // payment
   const [openPayment, setOpenPayment] = useState(false);
   const [paymentId, setPaymentId] = useState(null);
+  // sen
+  const [openSendMail, setOpenSendMail] = useState(false);
+  const [sendMailId, setSendMailId] = useState(null);
 
   useEffect(() => {
     fetchDecision({ page, size, ...searchFormData });
@@ -86,6 +92,7 @@ export default function DecisionMain() {
     setOpenView(false);
     setOpenSearch(false);
     setQrCode(false);
+    setOpenSendMail(false);
   };
 
   const handleViewDecision = (decisionId) => {
@@ -149,6 +156,18 @@ export default function DecisionMain() {
     setPaymentId(id);
     setOpenPayment(true);
   };
+  const handleSendMailDecision = async (id) => {
+    setIsSendMail(true);
+    try {
+      const response = await decisionService.sendMailDecision(id);
+      toast.success("Gửi mail thành công");
+    } catch (error) {
+      toast.error(error.response?.data || "Lỗi");
+    } finally {
+      setIsSendMail(false);
+    }
+  };
+
   const handleAction = (action) => {
     if (selectedRows.length === 0) {
       toast.warning("Chưa chọn bản ghi nào!");
@@ -182,6 +201,9 @@ export default function DecisionMain() {
           break;
         case "qrcode":
           handleQRCodeDecision(selectedId);
+          break;
+        case "send-mail":
+          handleSendMailDecision(selectedId);
           break;
         default:
           break;
@@ -281,10 +303,22 @@ export default function DecisionMain() {
           action="qrcode"
           onAction={handleAction}
         />
+        <ActionLink
+          icon="bi bi-envelope-paper"
+          label="Gửi email"
+          action="send-mail"
+          onAction={handleAction}
+        />
         {isExporting && (
           <>
             <div class="spinner-border" role="status"></div>
             <span class="sr-only">Đang xuất file...</span>
+          </>
+        )}{" "}
+        {isSendMail && (
+          <>
+            <div class="spinner-border" role="status"></div>
+            <span class="sr-only">Đang gửi mail...</span>
           </>
         )}{" "}
         {/* Spinner hoặc thông báo */}

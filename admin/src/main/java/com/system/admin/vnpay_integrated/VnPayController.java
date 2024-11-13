@@ -39,7 +39,7 @@ public class VnPayController {
         String decisionId = allParams.get("vnp_TxnRef");
         decisionService.updateDecisionPaidStatus(Integer.valueOf(decisionId), true);
         decisionService.getById(Long.valueOf(decisionId)).getBienBanViPham().setResolved(true);
-        return new RedirectView("http://localhost:3000/payment-success?vnp_TxnRef=" + decisionId);
+        return new RedirectView("http://localhost:3005/payment-success?vnp_TxnRef=" + decisionId);
     }
 
     @PostMapping("/vnpay")

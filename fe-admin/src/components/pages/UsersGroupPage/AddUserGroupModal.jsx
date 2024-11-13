@@ -17,7 +17,6 @@ import { toast } from "react-toastify";
 import * as Yup from "yup";
 import RoleService from "../../../service/role.service";
 import userGroupService from "../../../service/user-group.service";
-import userService from "../../../service/user.service";
 
 const validationSchema = Yup.object({
   name: Yup.string().required("Tên bắt buộc"),
@@ -40,49 +39,27 @@ function AddUserGroupModal({ open, onClose, onAddUserGroup }) {
     fetchRoles();
   }, []);
 
-  useEffect(() => {
-    const fetchUsersWithoutRoles = async () => {
-      try {
-        const response = await userService.getUsers();
-        // Lọc chỉ những người dùng chưa có quyền (roles trống hoặc undefined)
-        const usersWithoutRoles = response.data.filter(
-          (user) => !user.roles || user.roles.length === 0
-        );
-
-        setUsers(usersWithoutRoles);
-      } catch (error) {
-        console.error("Failed to fetch users", error);
-      }
-    };
-
-    fetchUsersWithoutRoles();
-  }, []);
-
   const handleSubmit = async (values) => {
     console.log("Submitted roles:", values.roles);
     console.log("Submitted users:", values.users);
     try {
       const groupData = {
         ...values,
-        // Nếu backend yêu cầu cả object user thay vì chỉ id
-        users: values.users.map((userId) =>
-          users.find((user) => user.id === userId)
-        ),
       };
 
       await userGroupService.addGroup(groupData);
 
-      const rolesAssignData = {
-        userIds: values.users,
-        roleIds: values.roles,
-      };
-      await userService.assignRolesToUsers(rolesAssignData);
+      // const rolesAssignData = {
+      //   userIds: values.users,
+      //   roleIds: values.roles,
+      // };
+      // await userService.assignRolesToUsers(rolesAssignData);
       toast.success("Nhóm người dùng đã được thêm thành công!");
       onAddUserGroup();
       onClose();
     } catch (error) {
       const errorMessage = error.response?.data || "Có lỗi xảy ra";
-      console.error("Error:", errorMessage);
+      console.error("Error:", error.response.data);
       toast.error(errorMessage);
     }
   };
@@ -100,7 +77,6 @@ function AddUserGroupModal({ open, onClose, onAddUserGroup }) {
             name: "",
             description: "",
             roles: [],
-            users: [],
           }}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
@@ -160,7 +136,7 @@ function AddUserGroupModal({ open, onClose, onAddUserGroup }) {
                   ))}
                 </Select>
               </FormControl>
-
+              {/* 
               <FormControl fullWidth margin="normal" variant="outlined">
                 <InputLabel id="user-label">Chọn người dùng</InputLabel>
                 <Select
@@ -190,7 +166,7 @@ function AddUserGroupModal({ open, onClose, onAddUserGroup }) {
                     </MenuItem>
                   ))}
                 </Select>
-              </FormControl>
+              </FormControl> */}
             </Form>
           )}
         </Formik>

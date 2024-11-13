@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify"; // Import thư viện toast
 import { useUserRoles } from "../../../hooks/useUserRoles";
 import violationService from "../../../service/violation.service";
+import AccessDenied from "../../layout/Error/AccessDenied";
 import DeleteConfirmationDialog from "./DeleteConfirmDialog ";
 import EditViolationDialog from "./EditViolationModal";
 import ViolationRecords from "./ListViolation/ListViolation";
@@ -10,8 +11,10 @@ import ViewViolationModal from "./ViewViolationModal";
 import "./ViolationMain.css";
 
 export default function ViolationMain() {
-  const roles = useUserRoles();
-  const canView = roles.includes("ROLE_ADMIN");
+  const { userRoles, groupRoles } = useUserRoles();
+  // Kiểm tra nếu "ROLE_ADMIN" có trong cả userRoles và groupRoles
+  const canView = [...userRoles, ...groupRoles].includes("ROLE_ADMIN");
+
   const [openDialogSearch, setOpenSearch] = useState(false);
   const handleOpenSearchModal = () => {
     setOpenSearch(true);
@@ -179,25 +182,7 @@ export default function ViolationMain() {
 
   // Render when the user doesn't have view permissions
   if (!canView) {
-    return (
-      <div className="d-flex justify-content-center align-items-center">
-        <div
-          className="text-center p-4"
-          style={{
-            borderRadius: "10px",
-            backgroundColor: "#e7f3fe",
-            border: "2px solid #007bff",
-            maxWidth: "500px",
-          }}
-        >
-          <i
-            className="bi bi-exclamation-octagon fw-bold text-primary"
-            style={{ fontSize: "48px" }}
-          ></i>
-          <h4 className="mt-3">Bạn không có quyền xem danh sách biên bản</h4>
-        </div>
-      </div>
-    );
+    return <AccessDenied />;
   }
 
   return (

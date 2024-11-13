@@ -10,13 +10,19 @@ import { DataGrid } from "@mui/x-data-grid";
 import { Tag } from "antd";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { useUserRoles } from "../../../hooks/useUserRoles";
 import permissionService from "../../../service/permission.service";
+import AccessDenied from "../../layout/Error/AccessDenied";
 import "../datatable.css";
 import SearchField from "../SearchField";
 import AddPermissionModal from "./AddPermissionModal";
 import EditPermissionModal from "./EditPermissionModal";
 
 function Permissions() {
+  const { userRoles, groupRoles } = useUserRoles();
+  // Kiểm tra nếu "ROLE_ADMIN" có trong cả userRoles và groupRoles
+  const canView = [...userRoles, ...groupRoles].includes("ROLE_ADMIN");
+
   const [data, setData] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]);
   const [openDelete, setOpenDelete] = useState(false);
@@ -146,7 +152,9 @@ function Permissions() {
       ),
     },
   ];
-
+  if (!canView) {
+    return <AccessDenied />;
+  }
   return (
     <div className="datatable">
       <div className="datatableTitle">

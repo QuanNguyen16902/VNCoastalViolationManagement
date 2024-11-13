@@ -20,9 +20,7 @@
     height: 40px;
     /* background-color: rgb(228, 235, 243); */
 }
-.home-icon {
-    background-image: url("../../../../images/logo-main-1.png")
-}
+
 .header-top1, .header-top2 {
     font-weight: 700;
     font-family: Arial, sans-serif;

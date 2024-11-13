@@ -20,8 +20,8 @@ function Sidebar() {
   ];
   const personLinks = [
     { path: "/violation-person", label: "Danh sách Người/Tổ chức vi phạm" },
-    { path: "/roles", label: "Danh sách Tàu vi phạm" },
-    { path: "/roles", label: "Danh sách Tang vật" },
+    { path: "/violation-ship", label: "Danh sách Tàu vi phạm" },
+    { path: "/seized-items", label: "Danh sách Tang vật" },
   ];
 
   return (

@@ -54,8 +54,6 @@ public class User {
 
     private boolean enabled;
 
-//    @OneToOne(cascade = CascadeType.ALL)
-//    @JoinColumn(name = "photo_id", referencedColumnName = "id")
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -64,6 +62,10 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
+
+    @ManyToMany(mappedBy = "users")
+    @JsonIgnore
+    private Set<UserGroup> groups = new HashSet<>();
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Profile profile;

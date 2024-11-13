@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Select from "react-select";
 import { toast } from "react-toastify";
 import diaphuongData from "../../../data/diaphuong.json";
 import { dieuKhoan } from "../../../data/dieukhoan";
@@ -7,7 +8,6 @@ import userService from "../../../service/user.service";
 import violationService from "../../../service/violation.service";
 import { getUserFromToken } from "../../../utils/auth";
 import "./PenaltyDecision.css";
-
 const years = [];
 for (let year = 1920; year <= 2024; year++) {
   years.push(year);
@@ -202,31 +202,6 @@ const AddPenaltyDecision = () => {
     }));
   };
 
-  // useEffect(() => {
-  //   const fetchViolationPerson = async () => {
-  //     if (selectedViolationId) {
-  //       try {
-  //         const responseViolation = await violationService.getViolation(
-  //           selectedViolationId
-  //         );
-  //         const violationPersonData = responseViolation.data.nguoiViPham;
-  //         const violationData = responseViolation.data;
-  //         console.log("vl:" + violationData);
-  //         setViolationPerson(violationPersonData);
-  //         setMainData({
-  //           ...mainData,
-  //           bienBanViPham: violationData,
-  //         });
-  //       } catch (error) {
-  //         console.error("Error fetching violation person data:", error);
-  //         // Xử lý lỗi nếu cần
-  //       }
-  //     }
-  //   };
-
-  //   fetchViolationPerson();
-  // }, [selectedViolationId]); // Chạy effect này khi selectedViolationId thay đổi
-
   const handleViolationPersonChange = async (e) => {
     const { value, name } = e.target;
     try {
@@ -385,7 +360,14 @@ const AddPenaltyDecision = () => {
       toast.error(error.response.data || "Lỗi tạo QĐXP, hãy thử lại");
     }
   };
-
+  const options = violationList.map((item) => ({
+    label: item.soVanBan,
+    value: item.id,
+  }));
+  const optionsThanhPho = diaphuongData.map((item) => ({
+    label: `${item.viet_tat} - ${item.dia_phuong}`,
+    value: item.dia_phuong,
+  }));
   return (
     <div id="box" className="container-xl bg-white ps-5 pe-lg-5 pt-4">
       <h1 className="text-center fw-700 mb-3">Quyết Định Xử Phạt</h1>
@@ -404,21 +386,26 @@ const AddPenaltyDecision = () => {
           <div className="row">
             <div className="col-md-4">
               <label className="form-label">Căn cứ vào biên bản</label>
-              <select
+              <Select
                 id="violationId"
                 name="violationId"
-                className="form-select"
-                value={mainData.bienBanViPham?.id}
-                onChange={handleViolationPersonChange}
-                required
-              >
-                <option value="">Chọn mã biên bản</option>
-                {violationList.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.soVanBan}
-                  </option>
-                ))}
-              </select>
+                value={
+                  options.find(
+                    (option) => option.value === mainData.bienBanViPham?.id
+                  ) || null
+                }
+                onChange={(selectedOption) =>
+                  handleViolationPersonChange({
+                    target: {
+                      name: "violationId",
+                      value: selectedOption ? selectedOption.value : "",
+                    },
+                  })
+                }
+                options={options}
+                placeholder="Chọn mã biên bản"
+                isClearable
+              />
             </div>
             <div className="col-md-4">
               <div className="mb-3">
@@ -460,21 +447,26 @@ const AddPenaltyDecision = () => {
                 <label htmlFor="thanhPho" className="form-label">
                   Thành phố:
                 </label>
-                <select
+                <Select
                   id="thanhPho"
                   name="thanhPho"
-                  className="form-select"
-                  value={mainData.thanhPho}
-                  onChange={handleMainChange}
-                  required
-                >
-                  <option value="">Chọn thành phố</option>
-                  {diaphuongData.map((item) => (
-                    <option key={item.stt} value={item.dia_phuong}>
-                      {item.viet_tat} - {item.dia_phuong}
-                    </option>
-                  ))}
-                </select>
+                  value={
+                    optionsThanhPho.find(
+                      (option) => option.value === mainData.thanhPho
+                    ) || null
+                  }
+                  onChange={(selectedOption) =>
+                    handleMainChange({
+                      target: {
+                        name: "thanhPho",
+                        value: selectedOption ? selectedOption.value : "",
+                      },
+                    })
+                  }
+                  options={optionsThanhPho}
+                  placeholder="Chọn thành phố"
+                  isClearable
+                />
               </div>
             </div>
 
@@ -533,7 +525,7 @@ const AddPenaltyDecision = () => {
                 <option value="">Chọn mã cán bộ</option>
                 {userList.map((item) => (
                   <option key={item.id} value={item.id}>
-                    {item.id} - {item.fullName}
+                    {item.id} - {item.profile?.fullName}
                   </option>
                 ))}
               </select>
@@ -705,7 +697,6 @@ const AddPenaltyDecision = () => {
                     className="form-select"
                     value={violationPerson.noiCap}
                     // onChange={handleViolationPersonChange}
-                    required
                   >
                     <option value="">Chọn nơi cấp</option>
                     {diaphuongData.map((item) => (
@@ -730,7 +721,6 @@ const AddPenaltyDecision = () => {
                     className="form-control"
                     value={violationPerson.ngayCap}
                     // onChange={handleViolationPersonChange}
-                    required
                   />
                 </div>
               </div>

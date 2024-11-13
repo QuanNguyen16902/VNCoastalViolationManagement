@@ -50,17 +50,11 @@ public class UserController {
 
 
 
-//    @GetMapping("/users/search")
-//    public ResponseEntity<PaginatedResponse<User>> searchUsers(@RequestParam("keyword") String keyword, Pageable pageable) {
-//        Page<User> userPage = userService.searchUsers(keyword, pageable);
-//        PaginatedResponse<User> response = new PaginatedResponse<>(
-//                userPage.getNumber() + 1,
-//                pageable.getPageSize(),
-//                userPage.getTotalElements(),
-//                userPage.getContent()
-//        );
-//        return ResponseEntity.ok().body(response);
-//    }
+    @GetMapping("/users/without-roles")
+    public List<User> getUsersWithoutRoles() {
+        return userService.getUsersWithoutRoles();
+    }
+
     @GetMapping("/users")
     public ResponseEntity<?> getAllUser() {
         List<User> userList = userService.getAll();

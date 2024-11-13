@@ -7,6 +7,7 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import Select from "react-select";
 import { toast } from "react-toastify";
 import diaphuongData from "../../../data/diaphuong.json";
 import { dieuKhoan } from "../../../data/dieukhoan";
@@ -31,7 +32,7 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
       const response = await violationService.getViolationList();
       setViolationList(response.data);
     } catch (error) {
-      toast.error(error.response.data);
+      toast.error(error.response?.data);
     }
   };
   useEffect(() => {
@@ -232,13 +233,28 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
     const { name, value } = e.target;
     const defaultText = "/QĐ-XPVPHC";
 
-    setMainData((prevData) => ({
-      ...prevData,
-      [name]:
-        name === "soQuyetDinh"
-          ? value.replace(defaultText, "") // Loại bỏ hậu tố trước khi lưu
-          : value,
-    }));
+    setMainData((prevData) => {
+      // Kiểm tra nếu tên trường là một trường trong bienBanViPham
+      if (name.startsWith("bienBanViPham.")) {
+        const fieldName = name.split(".")[1]; // Lấy tên trường con từ tên trường đầy đủ
+
+        return {
+          ...prevData,
+          bienBanViPham: {
+            ...prevData.bienBanViPham,
+            [fieldName]: value,
+          },
+        };
+      }
+
+      return {
+        ...prevData,
+        [name]:
+          name === "soQuyetDinh"
+            ? value.replace(defaultText, "") // Loại bỏ hậu tố trước khi lưu
+            : value,
+      };
+    });
   };
 
   useEffect(() => {
@@ -308,19 +324,16 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
         ...mainData,
         bienBanViPham: {
           ...mainData.bienBanViPham,
-          id: value,
-          hanhVi: response2.data.hanhVi,
-          viPhamDieuKhoan: response2.data.viPhamDieuKhoan,
+          id: value || "",
+          hanhVi: response2.data?.hanhVi || "",
+          viPhamDieuKhoan: response2.data?.viPhamDieuKhoan || "",
         },
         xuPhatChinh,
         xuPhatBoSung,
         bienPhapKhacPhuc,
       });
     } catch (error) {
-      console.error(
-        "Error fetching violation person data:",
-        error.response.data
-      );
+      toast.error("Error fetching violation person data:", error.response.data);
     }
   };
 
@@ -374,15 +387,21 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
       hieuLucThiHanh: new Date(mainData.hieuLucThiHanh).toISOString(),
       bienBanViPham: {
         ...mainData.bienBanViPham,
+        // Cập nhật lại các trường trong bienBanViPham nếu có sự thay đổi
         nguoiViPham: {
           ...violationPerson,
-          namSinh: Number(violationPerson.namSinh),
+          namSinh: Number(violationPerson.namSinh), // Đảm bảo namSinh là kiểu số
         },
+        id: mainData.bienBanViPham?.id || "", // Giữ nguyên giá trị hoặc cập nhật nếu có thay đổi
+        hanhVi: mainData.bienBanViPham?.hanhVi || "",
+        viPhamDieuKhoan: mainData.bienBanViPham?.viPhamDieuKhoan || "",
+        // Nếu có các trường khác trong bienBanViPham bạn muốn thay đổi, thêm vào đây.
       },
       executor: {
-        id: selectUserId,
+        id: selectUserId, // Giữ nguyên executor nếu có thay đổi
       },
     };
+
     console.log("Payload: " + payload);
 
     try {
@@ -398,7 +417,14 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
       );
     }
   };
-
+  const options = violationList.map((item) => ({
+    label: item.soVanBan,
+    value: item.id,
+  }));
+  const optionsThanhPho = diaphuongData.map((item) => ({
+    label: `${item.viet_tat} - ${item.dia_phuong}`,
+    value: item.dia_phuong,
+  }));
   return (
     <Dialog
       maxWidth="lg"
@@ -450,21 +476,28 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                 <div className="row">
                   <div className="col-md-4">
                     <label className="form-label">Căn cứ vào biên bản</label>
-                    <select
+                    <Select
                       id="violationId"
-                      name="violationId"
-                      className="form-select"
-                      value={mainData.bienBanViPham?.id}
-                      onChange={handleViolationPersonChange}
-                      readOnly
-                    >
-                      <option value="">Chọn mã biên bản</option>
-                      {violationList.map((item) => (
-                        <option key={item.id} value={item.id}>
-                          {item.soVanBan}
-                        </option>
-                      ))}
-                    </select>
+                      name="bienBanViPham.id"
+                      value={
+                        options.find(
+                          (option) =>
+                            option.value === mainData.bienBanViPham?.id
+                        ) || null
+                      }
+                      onChange={(selectedOption) =>
+                        handleViolationPersonChange({
+                          target: {
+                            name: "bienBanViPham.id",
+                            value: selectedOption ? selectedOption.value : "",
+                          },
+                        })
+                      }
+                      options={options}
+                      placeholder="Chọn mã biên bản"
+                      isClearable
+                      isDisabled
+                    />
                   </div>
                   <div className="col-md-4">
                     <div className="mb-3">
@@ -506,21 +539,26 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                       <label htmlFor="thanhPho" className="form-label">
                         Thành phố:
                       </label>
-                      <select
+                      <Select
                         id="thanhPho"
                         name="thanhPho"
-                        className="form-select"
-                        value={mainData.thanhPho}
-                        onChange={handleMainChange}
-                        required
-                      >
-                        <option value="">Chọn thành phố</option>
-                        {diaphuongData.map((item) => (
-                          <option key={item.stt} value={item.dia_phuong}>
-                            {item.viet_tat} - {item.dia_phuong}
-                          </option>
-                        ))}
-                      </select>
+                        value={
+                          optionsThanhPho.find(
+                            (option) => option.value === mainData.thanhPho
+                          ) || null
+                        }
+                        onChange={(selectedOption) =>
+                          handleMainChange({
+                            target: {
+                              name: "thanhPho",
+                              value: selectedOption ? selectedOption.value : "",
+                            },
+                          })
+                        }
+                        options={optionsThanhPho}
+                        placeholder="Chọn thành phố"
+                        isClearable
+                      />
                     </div>
                   </div>
 
@@ -854,8 +892,8 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                   </label>
                   <div className="col-sm-9">
                     <textarea
-                      id="hanhVi"
-                      name="hanhVi"
+                      id="bienBanViPham.shanhVi"
+                      name="bienBanViPham.hanhVi"
                       className="form-control"
                       value={mainData.bienBanViPham?.hanhVi}
                       onChange={handleMainChange}
@@ -871,10 +909,10 @@ function EditDecisionDialog({ open, onClose, onEditDecision, decisionId }) {
                   </label>
                   <div className="col-sm-9">
                     <textarea
-                      id="viPhamDieuKhoan"
-                      name="viPhamDieuKhoan"
+                      id="bienBanViPham.viPhamDieuKhoan"
+                      name="bienBanViPham.viPhamDieuKhoan"
                       className="form-control"
-                      value={mainData.bienBanViPham.viPhamDieuKhoan}
+                      value={mainData.bienBanViPham?.viPhamDieuKhoan}
                       onChange={handleMainChange}
                     />
                   </div>

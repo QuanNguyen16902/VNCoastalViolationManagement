@@ -111,6 +111,9 @@ public class AuthController {
             List<String> permissions = userDetails.getPermissions().stream()
                     .map(GrantedAuthority::getAuthority) // Lấy tên quyền từ getPermissions()
                     .collect(Collectors.toList());
+            List<String> rolesOfGroup = userDetails.getRolesOfGroup().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList());
 
 
             RefreshToken refreshToken;
@@ -130,7 +133,7 @@ public class AuthController {
             logService.save(log);
             // Trả về thông tin JWT và refresh token
             return ResponseEntity.ok(new JwtResponse(jwt, refreshToken.getToken(), userDetails.getId(),
-                    userDetails.getUsername(), userDetails.getEmail(), roles, permissions));
+                    userDetails.getUsername(), userDetails.getEmail(), roles, permissions, rolesOfGroup));
         } catch (BadCredentialsException e) {
             // Lỗi khi thông tin đăng nhập không chính xác
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Tên đăng nhập hoặc mật khẩu không đúng");

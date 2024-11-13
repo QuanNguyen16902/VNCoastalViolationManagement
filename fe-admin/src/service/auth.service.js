@@ -1,16 +1,30 @@
 import axios from "axios";
 import { Navigate } from "react-router-dom";
 import { setToken } from "../utils/auth";
+import apiConfig from "./../utils/config";
 import authHeader from "./auth-header";
-const API_URL = "http://localhost:8080/api/admin/auth/";
+const API_URL = apiConfig.apiBaseUrl;
 class AuthService {
   login(username, password) {
     return axios
-      .post(API_URL + "login", { username, password })
+      .post(`${apiConfig.apiBaseUrl}${apiConfig.apiLoginEndpoint}`, {
+        username,
+        password,
+      })
       .then((response) => {
         if (response.data.accessToken) {
           setToken(response.data.accessToken);
-          localStorage.setItem("userRoles", response.data.roles);
+          // Lưu roles dưới dạng mảng JSON
+          localStorage.setItem(
+            "userRoles",
+            JSON.stringify(response.data.roles)
+          );
+
+          // Lưu rolesOfGroup dưới dạng mảng JSON
+          localStorage.setItem(
+            "groupRoles",
+            JSON.stringify(response.data.rolesOfGroup)
+          );
           sessionStorage.setItem("sessionExpired", "false");
           return { success: true, data: response.data };
         }
@@ -40,7 +54,8 @@ class AuthService {
             navigateTo = "/500";
             break;
           default:
-            message = error.response?.data?.message || "Có lỗi xảy ra!";
+            message =
+              error.response?.data || "Có lỗi xảy ra từ server của bạn!";
         }
 
         console.log("Error message from server:", message); // Debugging log
@@ -61,7 +76,7 @@ class AuthService {
     // Gửi yêu cầu đăng xuất đến server
     return axios
       .post(
-        API_URL + "logout",
+        API_URL + "auth/logout",
         {},
         {
           headers: {
@@ -83,7 +98,11 @@ class AuthService {
   }
 
   register(username, email, password) {
-    return axios.post(API_URL + "register", { username, email, password });
+    return axios.post(`${API_URL}auth/register`, {
+      username,
+      email,
+      password,
+    });
   }
 
   // getCurrentUser() {

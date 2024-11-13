@@ -4,13 +4,19 @@ import axios from "axios";
 import React from "react";
 import { toast } from "react-toastify";
 import authHeader from "../../../service/auth-header";
+import apiConfig from "../../../utils/config";
 import { useConfig } from "./ConfigProvider"; // Import context
-
 const SaveButton = () => {
   const { config, loadConfig } = useConfig();
 
   const handleSubmit = async () => {
     const configData = {
+      siteName: config.siteName,
+      subSiteName: config.subSiteName,
+      footerText: config.footerText,
+      logoUrl: config.logoUrl,
+      websiteDescription: config.websiteDescription,
+
       tokenExpiry: config.tokenExpiry,
       tokenSecret: config.tokenSecret,
 
@@ -20,11 +26,13 @@ const SaveButton = () => {
       mailPassword: config.mailPassword,
       smtpAuth: config.smtpAuth,
       smtpStartTls: config.smtpStartTls,
+      mailViolationConfirmSubject: config.mailViolationConfirmSubject,
+      mailViolationConfirmContent: config.mailViolationConfirmContent,
     };
 
     try {
       const response = await axios.put(
-        "http://localhost:8080/api/admin/settings/jwt-config",
+        `${apiConfig.apiBaseUrl}settings/jwt-config`,
         configData,
         { headers: authHeader() }
       );

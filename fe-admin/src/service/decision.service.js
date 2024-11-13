@@ -1,7 +1,7 @@
 import axios from "axios";
+import apiConfig from "../utils/config";
 import authHeader from "./auth-header";
-
-const API_URL = "http://localhost:8080/api/admin/";
+const API_URL = apiConfig.apiBaseUrl;
 
 class DecisionService {
   getDecisionList() {
@@ -38,6 +38,11 @@ class DecisionService {
     return axios.get(API_URL + `export/decisions/pdf/${id}`, {
       headers: authHeader(),
       responseType: "blob",
+    });
+  }
+  sendMailDecision(id) {
+    return axios.get(API_URL + `penalty-decision/${id}/send-mail`, {
+      headers: authHeader(),
     });
   }
 }

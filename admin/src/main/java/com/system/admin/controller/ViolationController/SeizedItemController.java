@@ -31,17 +31,17 @@ public class SeizedItemController {
         // Ghi nhật ký
         return seizedItems;
     }
-//    @GetMapping("/seized-items/{id}")
-//    public ResponseEntity<SeizedItem> getOnePerson(@PathVariable Long id) {
-//        // Ghi nhật ký
-//        SeizedItem violationPerson = seizedItemService.getSeizedItem(id);
-//        return ResponseEntity.ok(violationPerson);
-//    }
-//    @PutMapping("/seized-items/{id}")
-//    public ResponseEntity<SeizedItem> updatePerson(@PathVariable Long id, @RequestBody SeizedItem violationPerson) {
-//        // Ghi nhật ký
-//        SeizedItem updateViolation = seizedItemService.updateSeizedItem(id, violationPerson);
-//        return ResponseEntity.ok(updateViolation);
-//    }
+    @GetMapping("/seized-items/{id}")
+    public ResponseEntity<SeizedItem> getOneSeizedItem(@PathVariable Long id) {
+        // Ghi nhật ký
+        SeizedItem violationPerson = seizedItemService.getSeizedItem(id);
+        return ResponseEntity.ok(violationPerson);
+    }
+    @PutMapping("/seized-items/{id}")
+    public ResponseEntity<SeizedItem> updateSeizedItem(@PathVariable Long id, @RequestBody SeizedItem violationPerson) {
+        // Ghi nhật ký
+        SeizedItem updateSeizedItem = seizedItemService.updateSeizedItem(id, violationPerson);
+        return ResponseEntity.ok(updateSeizedItem);
+    }
 
 }

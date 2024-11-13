@@ -3,7 +3,7 @@ import axios from "axios";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
 import { getToken } from "../../../utils/auth";
-
+import apiConfig from "../../../utils/config";
 const AvatarUpload = ({ userId, onAvatarChange, initialPhoto }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState(initialPhoto); // Set initial preview to initialPhoto
@@ -22,7 +22,7 @@ const AvatarUpload = ({ userId, onAvatarChange, initialPhoto }) => {
 
     try {
       const response = await axios.post(
-        `http://localhost:8080/api/admin/users/${userId}/photo`,
+        `${apiConfig.apiBaseUrl}users/${userId}/photo`,
         formData,
         {
           headers: {
