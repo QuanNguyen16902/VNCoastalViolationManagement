@@ -8,6 +8,7 @@ import EditDecisionDialog from "./EditDecisionModal";
 import PenaltyDecision from "./ListDecision";
 import PaymentModal from "./Payment/PaymentModal";
 import ReportGeneratorModal from "./QRCodeGenerator";
+import ViewDecisionModal from "./ViewDecisionModal";
 
 export default function DecisionMain() {
   const { userRoles, groupRoles } = useUserRoles();
@@ -119,6 +120,7 @@ export default function DecisionMain() {
   const handleClose = () => {
     setOpenDelete(false);
     setOpenEdit(false);
+    setOpenView(false);
   };
 
   // Handle edit user
@@ -350,6 +352,13 @@ export default function DecisionMain() {
           onEditDecision={() =>
             fetchDecision({ page, size, ...searchFormData })
           } // Refetch PenaltyDecision after editing
+        />
+      )}
+      {openView && (
+        <ViewDecisionModal
+          open={openView}
+          onClose={handleClose}
+          decisionId={viewDecisionId}
         />
       )}
     </div>

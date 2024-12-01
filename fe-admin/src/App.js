@@ -13,6 +13,7 @@ import DefaultLayout from "./components/layout/DefaultLayout/DefaultLayout";
 import Error403 from "./components/layout/Error/Error403";
 import Error404 from "./components/layout/Error/Error404";
 import Error500 from "./components/layout/Error/Error500";
+import PublicInfo from "./components/PublicInfo/PublicInfo";
 import { privateRoutes, publicRoutes } from "./router";
 import { getToken, isTokenExpired, removeToken } from "./utils/auth";
 
@@ -111,6 +112,7 @@ function App() {
             />
           );
         })}
+        <Route path="/public" element={<PublicInfo />} />
         <Route path="/403" element={<Error403 />} />
 
         {/* Route mặc định cho các trang không tồn tại */}

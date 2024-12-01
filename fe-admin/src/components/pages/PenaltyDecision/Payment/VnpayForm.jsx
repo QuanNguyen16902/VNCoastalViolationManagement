@@ -4,40 +4,61 @@ import React, { useState } from "react";
 
 function VnPayForm({ decisionId: initialDecisionId }) {
   const [decisionId, setDecisionId] = useState(initialDecisionId || "");
-  const [paymentMethod, setPaymentMethod] = useState("VNPay"); // Giá trị mặc định
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [qrCodeUrl, setQrCodeUrl] = useState(""); // URL của QR code
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // Hàm xử lý hiển thị mã QR
+  const handleShowQR = async () => {
     setLoading(true);
     setError("");
+    setQrCodeUrl("");
 
-    // Kiểm tra đầu vào
-    if (!decisionId || !paymentMethod) {
-      setError("Vui lòng nhập đầy đủ thông tin.");
+    if (!decisionId) {
+      setError("Vui lòng nhập mã quyết định.");
       setLoading(false);
       return;
     }
 
     try {
-      // Gửi yêu cầu POST tới backend
-      const response = await axios.post("http://localhost:8080/vnpay", {
+      setQrCodeUrl(
+        "https://res.cloudinary.com/dy2agire0/image/upload/v1731540384/qrpay2_st0smg.jpg"
+      ); // Hiển thị mã QR code
+    } catch (err) {
+      console.error(err);
+      setError("Đã xảy ra lỗi khi tạo QR code. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Hàm xử lý thanh toán VNPay
+  const handleVNPayPayment = async () => {
+    setLoading(true);
+    setError("");
+
+    if (!decisionId) {
+      setError("Vui lòng nhập mã quyết định.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await axios.post("http://localhost:4005/vnpay", {
         decisionId: Number(decisionId),
-        paymentMethod: paymentMethod,
+        paymentMethod: "VNPay",
       });
 
       const paymentUrl = response.data;
 
       if (paymentUrl) {
-        // Chuyển hướng người dùng tới URL thanh toán
-        window.location.href = paymentUrl;
+        window.location.href = paymentUrl; // Chuyển hướng đến trang thanh toán VNPay
       } else {
         setError("Không nhận được URL thanh toán từ máy chủ.");
       }
     } catch (err) {
       console.error(err);
-      setError("Đã xảy ra lỗi khi tạo thanh toán. Vui lòng thử lại.");
+      setError("Đã xảy ra lỗi khi thanh toán. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
@@ -45,50 +66,47 @@ function VnPayForm({ decisionId: initialDecisionId }) {
 
   return (
     <div style={styles.container}>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <div style={styles.formGroup}>
-          <label htmlFor="decisionId">Mã Quyết Định (Decision ID):</label>
-          <input
-            type="number"
-            id="decisionId"
-            value={decisionId}
-            onChange={(e) => setDecisionId(e.target.value)}
-            required
-            style={styles.input}
-            placeholder="Nhập mã quyết định"
-            disabled={!!initialDecisionId} // Nếu decisionId được truyền vào, không cho sửa
+      <div style={styles.formGroup}>
+        <label htmlFor="decisionId">Mã Quyết Định (Decision ID):</label>
+        <input
+          type="number"
+          id="decisionId"
+          value={decisionId}
+          onChange={(e) => setDecisionId(e.target.value)}
+          required
+          style={styles.input}
+          placeholder="Nhập mã quyết định"
+          disabled={!!initialDecisionId}
+        />
+      </div>
+
+      {error && <p style={styles.error}>{error}</p>}
+
+      {/* Hai nút: Hiển Thị QR Code và Thanh Toán VNPay */}
+      <div style={styles.buttonGroup}>
+        <button onClick={handleShowQR} style={styles.button} disabled={loading}>
+          {loading ? "Đang tải QR..." : "Hiển Thị QR Code"}
+        </button>
+        <button
+          onClick={handleVNPayPayment}
+          style={styles.button}
+          disabled={loading}
+        >
+          {loading ? "Đang xử lý..." : "Thanh Toán VNPay"}
+        </button>
+      </div>
+
+      {/* Hiển thị ảnh QR code nếu qrCodeUrl có giá trị */}
+      {qrCodeUrl && (
+        <div style={styles.qrContainer}>
+          <h4>Mã QR để nộp phạt:</h4>
+          <img
+            src={qrCodeUrl}
+            alt="QR Code for Payment"
+            style={styles.qrCode}
           />
         </div>
-        <div style={styles.formGroup}>
-          <label>Hình Thức Thanh Toán:</label>
-          <div style={styles.radioGroup}>
-            <label style={styles.radioLabel}>
-              <input
-                type="radio"
-                value="QR"
-                checked={paymentMethod === "QR"}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-                style={styles.radioInput}
-              />
-              Quét QR Ngân Hàng
-            </label>
-            <label style={styles.radioLabel}>
-              <input
-                type="radio"
-                value="VNPay"
-                checked={paymentMethod === "VNPay"}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-                style={styles.radioInput}
-              />
-              Thanh Toán VNPay
-            </label>
-          </div>
-        </div>
-        {error && <p style={styles.error}>{error}</p>}
-        <button type="submit" style={styles.button} disabled={loading}>
-          {loading ? "Đang xử lý..." : "Thanh Toán"}
-        </button>
-      </form>
+      )}
     </div>
   );
 }
@@ -96,12 +114,8 @@ function VnPayForm({ decisionId: initialDecisionId }) {
 // Các kiểu CSS đơn giản
 const styles = {
   container: {
-    maxWidth: "100%", // Để phù hợp với Modal
+    maxWidth: "100%",
     padding: "20px",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
   },
   formGroup: {
     marginBottom: "15px",
@@ -113,18 +127,9 @@ const styles = {
     borderRadius: "4px",
     border: "1px solid #ccc",
   },
-  radioGroup: {
+  buttonGroup: {
     display: "flex",
-    flexDirection: "column",
-    marginTop: "5px",
-  },
-  radioLabel: {
-    marginBottom: "10px",
-    display: "flex",
-    alignItems: "center",
-  },
-  radioInput: {
-    marginRight: "10px",
+    gap: "10px",
   },
   button: {
     padding: "10px",
@@ -137,6 +142,14 @@ const styles = {
   error: {
     color: "red",
     marginBottom: "15px",
+  },
+  qrContainer: {
+    marginTop: "20px",
+    textAlign: "center",
+  },
+  qrCode: {
+    width: "200px",
+    height: "200px",
   },
 };
 

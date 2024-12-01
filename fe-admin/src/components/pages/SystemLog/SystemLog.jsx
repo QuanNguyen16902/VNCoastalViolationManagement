@@ -41,8 +41,8 @@ const SystemLogs = () => {
     },
     {
       title: "User ID",
-      dataIndex: "userId",
-      key: "userId",
+      dataIndex: "user_id",
+      key: "user_id",
     },
     {
       title: "Hành động",

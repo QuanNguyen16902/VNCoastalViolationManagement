@@ -126,7 +126,7 @@ const SearchAdvanceFields = ({ selectedFields, onSearch }) => {
             <div className="row">
               {selectedFields.includes("hieuLucThiHanh") && (
                 <div className="col-12 col-sm-6 mb-2">
-                  <label>Thời gian lập</label>
+                  <label>Hiệu lực thi hành</label>
                   <div className="d-flex">
                     <input
                       type="date"

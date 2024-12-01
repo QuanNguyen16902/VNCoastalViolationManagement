@@ -216,15 +216,35 @@ public class DecisionController {
         }
     }
     @GetMapping("/auth/generate-qr/{format}/{id}")
-    public void generateQR(@PathVariable String format, @PathVariable Long id){
-        String pdfLink = "http://192.168.9.183:8080/api/admin/auth/view-report?id=" + id + "&format=" + format;
+    public byte[] generateQR(@PathVariable String format, @PathVariable Long id) throws IOException {
 
-        // Chuyển QR Code thành Image và lưu vào tham số
-        BufferedImage qrCodeImage = generateQRCodeImage(pdfLink); // Create this method
-        // Convert BufferedImage to Image for JasperReports
-        Image qrCodeJasperImage = qrCodeImage;
-        return ;
+        // Tạo liên kết PDF cho mã QR
+        String pdfLink = "http://192.168.21.104:4005/api/admin/auth/view-report?id=" + id + "&format=" + format;
+
+        try {
+            // Tạo mã QR từ liên kết PDF
+            QRCodeWriter qrCodeWriter = new QRCodeWriter();
+            BitMatrix bitMatrix = qrCodeWriter.encode(pdfLink, BarcodeFormat.QR_CODE, 200, 200); // Tạo mã QR với kích thước 200x200
+
+            // Chuyển BitMatrix thành BufferedImage
+            BufferedImage qrCodeImage = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+            for (int x = 0; x < 200; x++) {
+                for (int y = 0; y < 200; y++) {
+                    qrCodeImage.setRGB(x, y, bitMatrix.get(x, y) ? 0xFF000000 : 0xFFFFFF); // Màu đen và trắng
+                }
+            }
+
+            // Chuyển BufferedImage thành byte array
+            try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+                // Ghi BufferedImage vào OutputStream với định dạng do người dùng yêu cầu
+                ImageIO.write(qrCodeImage, "PNG", byteArrayOutputStream);
+                return byteArrayOutputStream.toByteArray();
+            }
+        } catch (WriterException e) {
+            throw new RuntimeException("Error generating QR code", e);
+        }
     }
+
     @GetMapping("/auth/view-report")
     public void viewReport(@RequestParam Long id, @RequestParam String format, HttpServletResponse response) {
         try {

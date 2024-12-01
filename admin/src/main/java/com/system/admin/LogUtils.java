@@ -31,7 +31,7 @@ public class LogUtils {
 
         // Kiểm tra xem người dùng đã đăng nhập chưa và lấy đối tượng User
         if (auth.getPrincipal() instanceof UserDetailsImpl userDetails) {
-            user = userService.getById(userDetails.getId()); // Giả định rằng bạn có phương thức tìm User theo ID
+            user = userService.getById(userDetails.getId());
         }
 
         // Thiết lập thông tin cho log

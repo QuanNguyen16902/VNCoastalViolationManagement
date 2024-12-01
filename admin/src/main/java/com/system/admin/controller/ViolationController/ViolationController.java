@@ -1,5 +1,6 @@
 package com.system.admin.controller.ViolationController;
 
+import com.system.admin.LogUtils;
 import com.system.admin.model.PenaltyDecision;
 import com.system.admin.model.SeizedItem;
 import com.system.admin.model.ViolationRecord.ViolationPerson;
@@ -14,6 +15,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +31,17 @@ import java.util.List;
 public class ViolationController {
     @Autowired
     public ViolationService violationService;
+    @Autowired
+    private LogUtils logUtils;  // Giả sử logUtils được inject
 
+    private String getCurrentUsername() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails) {
+            return ((UserDetails) principal).getUsername();
+        } else {
+            return principal.toString();
+        }
+    }
     @GetMapping("/violation-records")
     public ResponseEntity<List<ViolationRecord>> listAll(){
         List<ViolationRecord> list = violationService.getAll();
@@ -67,6 +80,7 @@ public class ViolationController {
     public ResponseEntity<ViolationRecord> createNewRecord(@RequestBody ViolationRecord violationRecord){
         try{
             ViolationRecord newRecord = violationService.create(violationRecord);
+            logUtils.logAction("POST", "Created a new violation record with ID: " + newRecord.getId(), getCurrentUsername());
             return ResponseEntity.status(HttpStatus.CREATED).body(newRecord);
 
         }catch (RuntimeException e){
@@ -80,6 +94,7 @@ public class ViolationController {
         try {
             ViolationRecord violationRecord = violationService.getById(id);
             // Ghi nhật ký
+            logUtils.logAction("GET", "Truy xuất bieen ban ID: " + id, getCurrentUsername());
 //            logUtils.logAction("GET", "Fetched người dùng theo ID: " + id, user.getUsername());
             return ResponseEntity.ok(violationRecord);
         } catch (RuntimeException e) {
@@ -88,15 +103,16 @@ public class ViolationController {
     }
 
     @PutMapping("/violation-records/{id}")
-    public ResponseEntity<ViolationRecord> updateUserGroup(@PathVariable Long id, @RequestBody ViolationRecord violationRecord) {
+    public ResponseEntity<ViolationRecord> updateViolation(@PathVariable Long id, @RequestBody ViolationRecord violationRecord) {
         ViolationRecord updatedViolation = violationService.updateViolation(id, violationRecord);
         return ResponseEntity.ok(updatedViolation);
     }
 
 
     @DeleteMapping("/violation-records/{id}")
-    public ResponseEntity<?> deleteUserGroup(@PathVariable Long id) {
+    public ResponseEntity<?> deleteViolation(@PathVariable Long id) {
         violationService.deleteById(id);
+        logUtils.logAction("DELETE", "Fetched violation record with ID: " + id, getCurrentUsername());
         return ResponseEntity.status(HttpStatus.ACCEPTED).body("Xóa thành công");
     }
 
@@ -147,11 +163,7 @@ public class ViolationController {
             parameters.put("noiCap", item.getNguoiViPham().getNoiCap());
             parameters.put("hanhVi", item.getHanhVi());
             parameters.put("quocTich", item.getNguoiViPham().getQuocTich());
-//        parameters.put("tenCoQuan", item.getTenCoQuan());
-//        parameters.put("soVanBan", item.getSoVanBan());
-//        parameters.put("thoiGianLap", item.getThoiGianLap());
-//        parameters.put("nguoiLap", item.getNguoiLap());
-//        parameters.put("nguoiChungKien", item.getNguoiChungKien());
+
             parameters.put("nguoiThietHai", item.getNguoiThietHai());
 
             parameters.put("thoiGianViPham", item.getTauViPham().getThoiGianViPham());
@@ -179,7 +191,7 @@ public class ViolationController {
             // Thiết lập header để mở file PDF trực tiếp
             response.setContentType("application/pdf");
             response.setHeader("Content-Disposition", "inline;  filename=\"report." + format + "\"");
-
+            logUtils.logAction("GET", "Xuất biên bản vi phạm ID: " + id, getCurrentUsername());
             // Xuất PDF ra response output stream
             JasperExportManager.exportReportToPdfStream(jasperPrint, response.getOutputStream());
             response.getOutputStream().flush();
