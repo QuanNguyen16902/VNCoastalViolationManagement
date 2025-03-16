@@ -10,6 +10,7 @@ function NavAvatar() {
   const navigate = useNavigate();
   const [userDetails, setUserDetails] = useState({});
   const currentUser = getUserFromToken();
+  console.log("crrruen:0" + currentUser.sub);
   const fetchUser = async () => {
     try {
       if (currentUser) {
