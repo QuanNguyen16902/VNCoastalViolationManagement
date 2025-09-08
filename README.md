@@ -56,13 +56,13 @@ The system helps **digitize violation management data** instead of manual paperw
 - **Reporting**: Jasper Report  
 - **QR Scanning**: ZXing  
 - **Media Storage**: Cloudinary  
-- **Deployment**: AWS (EC2, S3, RDS, IAM)  
+- **Deployment**: AWS (VPC, EC2, S3, RDS, IAM)  
 - **Other**: RESTful API, Axios  
 
 ---
 ## 🏗️ System Architecture
 <p>
-  <img src="https://res.cloudinary.com/dy2agire0/image/upload/v1757350224/architecture-vio_nd05iu.png" alt="Architecture" width="100%"/>
+  <img src="https://res.cloudinary.com/dy2agire0/image/upload/v1757352252/architecture-newst_uxyvqw.png" alt="Architecture" width="100%"/>
 </p>
 ---
 
