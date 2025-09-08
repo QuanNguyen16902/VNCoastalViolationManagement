@@ -65,6 +65,7 @@ The system helps **digitize violation management data** instead of manual paperw
   <img src="https://res.cloudinary.com/dy2agire0/image/upload/v1757350224/architecture-vio_nd05iu.png" alt="Architecture" width="100%"/>
 </p>
 ---
+
 ## 📷 UI Showcase
 
 ### 🔑 Sign In, Sign Up, Forgot Password
