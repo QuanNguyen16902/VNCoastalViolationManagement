@@ -10,6 +10,7 @@ This project is developed to support the **Vietnam Coast Guard** in:
 - Enabling fast and transparent online payments.  
 
 The system helps **digitize violation management data** instead of manual paperwork, thereby improving efficiency, saving time, and minimizing errors.  
+Link: http://ec2-54-226-64-202.compute-1.amazonaws.com/login
 
 ---
 
@@ -128,5 +129,4 @@ The system helps **digitize violation management data** instead of manual paperw
 ```bash
 git clone https://github.com/QuanNguyen16902/vietnam-coastal-violation-management.git
 cd vietnam-coastal-violation-management
-
 
