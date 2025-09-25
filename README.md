@@ -61,6 +61,11 @@ Link: http://ec2-54-226-64-202.compute-1.amazonaws.com/login
 - **Other**: RESTful API, Axios  
 
 ---
+## Authentication Work Flow
+<p>
+  <img src="https://res.cloudinary.com/dy2agire0/image/upload/v1758790269/spring-security-refresh-token-jwt-spring-boot-flow_cto9hu.png" width="80%" alt="Login Work Flow"/>
+</p>
+
 ## 🏗️ System Architecture
 <p>
   <img src="https://res.cloudinary.com/dy2agire0/image/upload/v1757352252/architecture-newst_uxyvqw.png" alt="Architecture" width="100%"/>
