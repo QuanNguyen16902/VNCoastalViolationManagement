@@ -63,7 +63,7 @@ Link: http://ec2-54-226-64-202.compute-1.amazonaws.com/login
 ---
 ## Authentication Work Flow
 <p>
-  <img src="https://res.cloudinary.com/dy2agire0/image/upload/v1758790269/spring-security-refresh-token-jwt-spring-boot-flow_cto9hu.png" width="80%" alt="Login Work Flow"/>
+  <img src="https://res.cloudinary.com/dy2agire0/image/upload/v1758790565/spring-security-refresh-token-jwt-spring-boot-flow_rtcfpr.png" width="80%" alt="Login Work Flow"/>
 </p>
 
 ## 🏗️ System Architecture
